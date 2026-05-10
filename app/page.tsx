@@ -10,7 +10,7 @@ export default function HomePage() {
           <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center">
             <span className="text-white font-bold text-sm">F</span>
           </div>
-          <span style={{ fontFamily: "'Stinger', serif" }} className="font-medium text-charcoal text-base tracking-tight">Friday</span>
+          <span style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif" }} className="font-medium text-charcoal text-base tracking-tight">Friday</span>
         </div>
         <a href="/dashboard" style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm text-charcoal/70 hover:text-coral transition-colors">
           Go to app →
@@ -21,7 +21,7 @@ export default function HomePage() {
       <section className="flex-1 flex flex-col items-center justify-center px-6 pt-10 pb-24">
         <div className="w-full max-w-2xl text-center space-y-8">
           {/* Headline */}
-          <h1 style={{ fontFamily: "'Stinger', Georgia, serif", fontWeight: 500 }} className="text-5xl md:text-6xl text-charcoal leading-tight">
+          <h1 style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif", fontWeight: 600 }} className="text-5xl md:text-6xl text-charcoal leading-tight">
             Find your next<br />
             <span style={{ color: '#FF6B35' }}>viral hook.</span>
           </h1>
