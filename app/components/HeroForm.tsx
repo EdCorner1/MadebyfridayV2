@@ -32,7 +32,7 @@ export default function HeroForm() {
           <span className="text-xs text-charcoal/25 mr-4">press Enter to go</span>
           <button
             type="submit"
-            className="w-8 h-8 flex items-center justify-center bg-coral text-white rounded-full hover:bg-coral/90 transition-colors"
+            className="w-9 h-9 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
             aria-label="Go"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

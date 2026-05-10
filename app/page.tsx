@@ -7,12 +7,12 @@ export default function HomePage() {
       {/* Simple nav */}
       <nav className="w-full px-6 py-5 flex items-center justify-between max-w-3xl mx-auto">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-coral flex items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">F</span>
           </div>
           <span style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif" }} className="font-medium text-charcoal text-base tracking-tight">Friday</span>
         </div>
-        <a href="/dashboard" style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm text-charcoal/70 hover:text-coral transition-colors">
+        <a href="/dashboard" style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm text-charcoal hover:text-red-600 transition-colors font-medium">
           Go to app →
         </a>
       </nav>
@@ -21,9 +21,9 @@ export default function HomePage() {
       <section className="flex-1 flex flex-col items-center justify-center px-6 pt-10 pb-24">
         <div className="w-full max-w-2xl text-center space-y-8">
           {/* Headline */}
-          <h1 style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif", fontWeight: 600 }} className="text-5xl md:text-6xl text-charcoal leading-tight">
+          <h1 style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif", fontWeight: 600 }} className="text-6xl md:text-7xl text-charcoal leading-tight">
             Find your next<br />
-            <span style={{ color: '#FF6B35' }}>viral hook.</span>
+            <span style={{ color: '#DC2626' }}>viral hook.</span>
           </h1>
 
           {/* Subheadline */}
