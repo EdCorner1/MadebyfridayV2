@@ -10,14 +10,18 @@ interface Hook {
 
 async function getHooks(): Promise<Hook[]> {
   const csv = await readFile(join(process.cwd(), 'data/hooks.csv'), 'utf-8');
-  const lines = csv.split('\n').slice(1); // skip header
+  const lines = csv.split('\n').slice(1);
   const hooks: Hook[] = lines
     .filter(l => l.trim())
     .map(line => {
       const [name, type, url, number] = line.split(',');
-      return { name: name?.trim() ?? '', type: type?.trim() ?? '', url: url?.trim() ?? '', number: parseInt(number) || 0 };
+      return {
+        name: name?.trim() ?? '',
+        type: type?.trim() ?? '',
+        url: url?.trim() ?? '',
+        number: parseInt(number) || 0,
+      };
     });
-  // Shuffle and pick 6 using seeded-ish selection based on time-of-day
   const seed = Math.floor(Date.now() / 86400000);
   const shuffled = [...hooks].sort((a, b) => (a.number + seed) % 1000 - (b.number + seed) % 1000);
   return shuffled.slice(0, 6);
@@ -55,7 +59,7 @@ export default async function Dashboard({
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {/* Main content area */}
+          {/* Main content */}
           <div className="md:col-span-2 space-y-4">
             <p className="text-sm text-[#787167] font-medium uppercase tracking-widest">
               Pulled from {hooks.length} viral references
@@ -73,23 +77,24 @@ export default async function Dashboard({
                     <h2 className="mt-2 text-base font-semibold text-[#111111]">
                       {hook.name}
                     </h2>
+
+                    {/* Video preview embed — shows the Instagram video thumbnail + inline player */}
+                    <div className="mt-3">
+                      <InstagramPreview url={hook.url} />
+                    </div>
+
                     <p className="mt-2 text-sm text-[#5e5a54]">
                       Hook #{i + 1} · Seed score: {hook.number}
                     </p>
-                    <div className="mt-3 flex items-center gap-2 flex-wrap">
-                      <a
-                        href={hook.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full bg-[#f7f4ee] px-3 py-1 text-xs text-[#555] hover:bg-[#ece7df] transition"
-                      >
-                        📺 View on Instagram
-                      </a>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <WatchButton url={hook.url} />
                       <span className="rounded-full bg-[#f7f4ee] px-3 py-1 text-xs text-[#555]">
                         🔗 {hook.type}
                       </span>
                     </div>
                   </div>
+
                   <div className="flex flex-col gap-2 min-w-[120px]">
                     <button className="rounded-full bg-[#111111] px-4 py-2 text-sm text-white whitespace-nowrap hover:bg-[#333] transition">
                       I&apos;ll use this
@@ -133,5 +138,55 @@ export default async function Dashboard({
         </div>
       </div>
     </div>
+  );
+}
+
+function InstagramPreview({ url }: { url: string }) {
+  // Extract the post/reel ID from the Instagram URL
+  const match = url.match(/instagram\.com\/(?:p|reel|tv)\/([^\/\?]+)/);
+  const postId = match ? match[1] : null;
+
+  if (!postId) {
+    return (
+      <div className="rounded-[14px] bg-[#f7f4ee] border border-[#ece7df] p-4 text-sm text-[#999]">
+        Video preview unavailable
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full rounded-[14px] overflow-hidden border border-[#ece7df] bg-[#fafaf8]">
+      <div
+        className="relative w-full"
+        style={{ paddingTop: '177.77%' }} /* 9:16 vertical video ratio */
+      >
+        {/* Instagram embed — keeps creator on the page */}
+        <iframe
+          src={`https://www.instagram.com/p/${postId}/embed/`}
+          className="absolute inset-0 w-full h-full"
+          frameBorder="0"
+          scrolling="no"
+          allowTransparency={true}
+          title="Instagram video preview"
+          style={{ background: 'transparent' }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function WatchButton({ url }: { url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="rounded-full bg-[#FF6B35] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition flex items-center gap-1"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+      Watch video
+    </a>
   );
 }
