@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { Hook } from '../app/dashboard/types';
+import { Hook } from './types';
 
 export async function getHooks(): Promise<Hook[]> {
   const csv = await readFile(join(process.cwd(), 'data/hooks.csv'), 'utf-8');
