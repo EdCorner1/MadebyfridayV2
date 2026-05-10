@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Stinger:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,51 +16,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+/* Stinger for headlines only */
+h1, h2, h3, h4, .font-headline {
   font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Stinger font utility classes */
+/* Inter for body/prose */
+body, p, span, li, td, input, textarea, button {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 .font-stinger {
   font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.font-stinger-light {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 300;
-}
-
-.font-stinger-regular {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 400;
-}
-
-.font-stinger-medium {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 500;
-}
-
-.font-stinger-semibold {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 600;
-}
-
-.font-stinger-bold {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 700;
-}
-
-.font-stinger-extrabold {
-  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 800;
-}
-
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -73,17 +47,6 @@ html {
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
-}
-
-/* Focus styles */
-*:focus-visible {
-  outline: 2px solid var(--color-coral);
-  outline-offset: 2px;
-}
-
-/* Line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
