@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const plans = [
@@ -52,35 +53,15 @@ const plans = [
   },
 ];
 
-interface PricingProps {
-  onSubscribe?: (plan: string) => void;
-}
-
-export default function PricingSection({ onSubscribe }: PricingProps) {
+export default function PricingSection() {
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleSubscribe = async (planId: string) => {
-    if (onSubscribe) {
-      onSubscribe(planId);
-      return;
-    }
-
+  const handleSubscribe = (planId: string) => {
     setLoading(planId);
-    try {
-      const res = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch {
-      alert('Something went wrong. Try again.');
-    } finally {
-      setLoading(null);
-    }
+    // Route straight to dashboard — paid access simulated for now
+    // Stripe will be wired when domain + payments go live
+    router.push(`/dashboard?plan=${planId}`);
   };
 
   return (
@@ -90,7 +71,7 @@ export default function PricingSection({ onSubscribe }: PricingProps) {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-[#FF6B35] mb-3">
             Pricing
           </p>
-          <h2 className="text-3xl sm:text-4xl font-semibold text-[#111] mb-3">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#111] mb-3">
             Stop guessing. Start creating.
           </h2>
           <p className="text-base text-[#5e5a54] max-w-[500px] mx-auto">
@@ -117,11 +98,13 @@ export default function PricingSection({ onSubscribe }: PricingProps) {
               )}
 
               <div className="mb-5">
-                <p className={`text-[11px] font-semibold uppercase tracking-widest mb-2 ${plan.popular ? 'text-white/60' : 'text-[#787167]'}`}>
+                <p className={`text-[11px] font-semibold uppercase tracking-widest mb-2 ${
+                  plan.popular ? 'text-white/60' : 'text-[#787167]'
+                }`}>
                   {plan.name}
                 </p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold">£{plan.price}</span>
+                  <span className="text-4xl font-bold">£{plan.price}</span>
                   <span className={`text-sm ${plan.popular ? 'text-white/60' : 'text-[#aaa]'}`}>
                     {plan.period}
                   </span>
@@ -156,7 +139,7 @@ export default function PricingSection({ onSubscribe }: PricingProps) {
         </div>
 
         <p className="text-center text-xs text-[#aaa] mt-6">
-          All plans include a free trial. No credit card required to start.
+          Payments coming soon — all plans free to start.
         </p>
       </div>
     </section>
