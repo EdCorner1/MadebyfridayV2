@@ -31,21 +31,10 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: text }),
-      });
-
-      if (res.ok) {
-        // Redirect to dashboard with the prompt so Friday can load ideas
-        router.push(`/dashboard?q=${encodeURIComponent(text)}`);
-      } else {
-        alert('Something went wrong. Try again.');
-        setLoading(false);
-      }
+      // Route straight to dashboard — Friday loads the hooks there
+      router.push(`/dashboard?q=${encodeURIComponent(text)}`);
     } catch {
-      alert('Connection error. Check your API key.');
+      alert('Connection error. Try again.');
       setLoading(false);
     }
   };
