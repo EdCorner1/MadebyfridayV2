@@ -1,12 +1,7 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-
-interface Hook {
-  name: string;
-  type: string;
-  url: string;
-  number: number;
-}
+import HookGrid from './HookGrid';
+import { Hook } from './types';
 
 async function getHooks(): Promise<Hook[]> {
   const csv = await readFile(join(process.cwd(), 'data/hooks.csv'), 'utf-8');
@@ -58,135 +53,8 @@ export default async function Dashboard({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {/* Main content */}
-          <div className="md:col-span-2 space-y-4">
-            <p className="text-sm text-[#787167] font-medium uppercase tracking-widest">
-              Pulled from {hooks.length} viral references
-            </p>
-            {hooks.map((hook, i) => (
-              <article
-                key={i}
-                className="rounded-[20px] border border-[#ece7df] bg-white p-5"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">
-                      {hook.type}
-                    </p>
-                    <h2 className="mt-2 text-base font-semibold text-[#111111]">
-                      {hook.name}
-                    </h2>
-
-                    {/* Video preview embed — shows the Instagram video thumbnail + inline player */}
-                    <div className="mt-3">
-                      <InstagramPreview url={hook.url} />
-                    </div>
-
-                    <p className="mt-2 text-sm text-[#5e5a54]">
-                      Hook #{i + 1} · Seed score: {hook.number}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <WatchButton url={hook.url} />
-                      <span className="rounded-full bg-[#f7f4ee] px-3 py-1 text-xs text-[#555]">
-                        🔗 {hook.type}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 min-w-[120px]">
-                    <button className="rounded-full bg-[#111111] px-4 py-2 text-sm text-white whitespace-nowrap hover:bg-[#333] transition">
-                      I&apos;ll use this
-                    </button>
-                    <button className="rounded-full border border-black/10 px-4 py-2 text-sm text-[#555] whitespace-nowrap hover:bg-[#f7f4ee] transition">
-                      Not for me
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {/* Sidebar */}
-          <aside className="space-y-4">
-            <div className="rounded-[20px] border border-[#ece7df] bg-white p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167] mb-4">
-                My Content Planner
-              </p>
-              <div className="space-y-3">
-                <p className="text-sm text-[#aaa] italic">
-                  No scripts saved yet. Hit &quot;I&apos;ll use this&quot; to save one.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-[#ece7df] bg-white p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167] mb-4">
-                Friday&apos;s Recommendation
-              </p>
-              <div className="rounded-[14px] bg-[#fffdf9] border border-[#ece7df] p-4">
-                <p className="text-sm font-medium text-[#111]">
-                  Hook #{hooks[2] ? Math.floor(Math.random() * 6) + 1 : 3} matches your prompt best for engagement.
-                </p>
-                <button className="mt-3 w-full rounded-full bg-[#FF6B35] text-white py-2 text-sm font-medium">
-                  Start rewriting →
-                </button>
-              </div>
-            </div>
-          </aside>
-        </div>
+        <HookGrid initialHooks={hooks} userPrompt={userPrompt} />
       </div>
     </div>
-  );
-}
-
-function InstagramPreview({ url }: { url: string }) {
-  // Extract the post/reel ID from the Instagram URL
-  const match = url.match(/instagram\.com\/(?:p|reel|tv)\/([^\/\?]+)/);
-  const postId = match ? match[1] : null;
-
-  if (!postId) {
-    return (
-      <div className="rounded-[14px] bg-[#f7f4ee] border border-[#ece7df] p-4 text-sm text-[#999]">
-        Video preview unavailable
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative w-full rounded-[14px] overflow-hidden border border-[#ece7df] bg-[#fafaf8]">
-      <div
-        className="relative w-full"
-        style={{ paddingTop: '177.77%' }} /* 9:16 vertical video ratio */
-      >
-        {/* Instagram embed — keeps creator on the page */}
-        <iframe
-          src={`https://www.instagram.com/p/${postId}/embed/`}
-          className="absolute inset-0 w-full h-full"
-          frameBorder="0"
-          scrolling="no"
-          allowTransparency={true}
-          title="Instagram video preview"
-          style={{ background: 'transparent' }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function WatchButton({ url }: { url: string }) {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="rounded-full bg-[#FF6B35] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition flex items-center gap-1"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-      Watch video
-    </a>
   );
 }
