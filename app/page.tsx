@@ -26,28 +26,10 @@ export default function Home() {
   const handleSubmit = async (e?: React.FormEvent, prefill?: string) => {
     e?.preventDefault();
     const text = prefill || prompt.trim();
-    if (!text || loading) return;
+    if (!text) return;
 
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: text }),
-      });
-
-      if (res.ok) {
-        // Redirect to dashboard with the prompt so Friday can load ideas
-        router.push(`/dashboard?q=${encodeURIComponent(text)}`);
-      } else {
-        alert('Something went wrong. Try again.');
-        setLoading(false);
-      }
-    } catch {
-      alert('Connection error. Check your API key.');
-      setLoading(false);
-    }
+    // Route straight to dashboard with the prompt — Friday loads the hooks server-side
+    router.push(`/dashboard?q=${encodeURIComponent(text)}`);
   };
 
   return (
