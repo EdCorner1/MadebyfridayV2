@@ -27,7 +27,7 @@ export default async function Home() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-[#FF6B35] mb-4">
             For UGC creators who are done guessing
           </p>
-          <h1 className="text-[2.6rem] sm:text-5xl lg:text-[3.8rem] font-semibold tracking-tight leading-[1.02] text-[#111] mb-5">
+          <h1 className="text-[2.6rem] sm:text-5xl lg:text-[3.8rem] font-bold tracking-tight leading-[1.02] text-[#111] mb-5">
             Your next viral script is 60 seconds away.
           </h1>
           <p className="text-lg text-[#5e5a54] max-w-[600px] mx-auto leading-relaxed">

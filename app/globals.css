@@ -1,42 +1,99 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Stinger:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #f7f5ff;
-  --foreground: #0f172a;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-coral: #FF6B35;
+  --color-cream: #FDFCF7;
+  --color-charcoal: #111111;
 }
 
 * {
-  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Stinger font utility classes */
+.font-stinger {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.font-stinger-light {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 300;
+}
+
+.font-stinger-regular {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+}
+
+.font-stinger-medium {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+}
+
+.font-stinger-semibold {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 600;
+}
+
+.font-stinger-bold {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+}
+
+.font-stinger-extrabold {
+  font-family: 'Stinger', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 800;
+}
+
+/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-button,
-input,
-textarea {
-  font: inherit;
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
 }
 
-textarea {
-  field-sizing: content;
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
 }
 
-::selection {
-  background: rgba(124, 77, 255, 0.18);
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
