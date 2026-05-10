@@ -53,7 +53,7 @@ export default async function Dashboard({
           </p>
         </div>
 
-        <HookGrid initialHooks={hooks} userPrompt={userPrompt} />
+        <HookGrid initialHooks={hooks} />
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import { Hook } from './types';
 
 interface HookGridProps {
   initialHooks: Hook[];
-  userPrompt: string;
 }
 
 export default function HookGrid({ initialHooks }: HookGridProps) {
@@ -16,6 +15,7 @@ export default function HookGrid({ initialHooks }: HookGridProps) {
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [rejectedIds, setRejectedIds] = useState<Set<string>>(new Set());
   const [rewriteHook, setRewriteHook] = useState<Hook | null>(null);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     try {
@@ -64,50 +64,83 @@ export default function HookGrid({ initialHooks }: HookGridProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-4">
-          <p className="text-sm text-[#787167] font-medium uppercase tracking-widest">
-            {remainingHooks.length} ideas · {savedIds.size} saved
-          </p>
-
-          {remainingHooks.length === 0 ? (
-            <div className="rounded-[20px] border border-[#ece7df] bg-white p-12 text-center">
-              <p className="text-[#aaa] text-base">
-                You&apos;ve seen all 6 ideas. Check your planner for saved hooks.
-              </p>
-            </div>
-          ) : (
-            remainingHooks.map((hook, i) => (
-              <HookCard
-                key={i}
-                hook={hook}
-                index={i}
-                isSaved={savedIds.has(hook.url)}
-                onSave={() => handleSave(hook.url, hook)}
-                onReject={() => handleReject(hook.url)}
-              />
-            ))
-          )}
-
-          {rejectedIds.size > 0 && (
-            <button
-              onClick={() => {
-                setRejectedIds(new Set());
-                localStorage.setItem('mbf_rejected', JSON.stringify([]));
-              }}
-              className="text-sm text-[#999] underline hover:text-[#555] transition"
-            >
-              Reset rejected ({rejectedIds.size})
-            </button>
-          )}
+      {/* View toggle + counter */}
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm text-[#787167] font-medium">
+          {remainingHooks.length} ideas · {savedIds.size} saved
+        </p>
+        <div className="flex items-center gap-1 rounded-full bg-white border border-[#ece7df] p-1">
+          <button
+            onClick={() => setView('grid')}
+            className={`rounded-full px-3 py-1.5 text-xs transition ${
+              view === 'grid'
+                ? 'bg-[#111] text-white'
+                : 'text-[#888] hover:text-[#333]'
+            }`}
+          >
+            ▦ Grid
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`rounded-full px-3 py-1.5 text-xs transition ${
+              view === 'list'
+                ? 'bg-[#111] text-white'
+                : 'text-[#888] hover:text-[#333]'
+            }`}
+          >
+            ☰ List
+          </button>
         </div>
-
-        <PlannerSidebar
-          savedHooks={savedHooks}
-          onUnsave={handleUnsave}
-          onRewrite={setRewriteHook}
-        />
       </div>
+
+      {/* Grid/List views */}
+      {view === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3">
+          {remainingHooks.map((hook, i) => (
+            <HookCard
+              key={i}
+              hook={hook}
+              index={i}
+              isSaved={savedIds.has(hook.url)}
+              onSave={() => handleSave(hook.url, hook)}
+              onReject={() => handleReject(hook.url)}
+              variant="grid"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {remainingHooks.map((hook, i) => (
+            <HookCard
+              key={i}
+              hook={hook}
+              index={i}
+              isSaved={savedIds.has(hook.url)}
+              onSave={() => handleSave(hook.url, hook)}
+              onReject={() => handleReject(hook.url)}
+              variant="list"
+            />
+          ))}
+        </div>
+      )}
+
+      {rejectedIds.size > 0 && (
+        <button
+          onClick={() => {
+            setRejectedIds(new Set());
+            localStorage.setItem('mbf_rejected', JSON.stringify([]));
+          }}
+          className="mt-4 text-sm text-[#999] underline hover:text-[#555] transition"
+        >
+          Reset rejected ({rejectedIds.size})
+        </button>
+      )}
+
+      <PlannerSidebar
+        savedHooks={savedHooks}
+        onUnsave={handleUnsave}
+        onRewrite={setRewriteHook}
+      />
 
       {rewriteHook && (
         <RewritePanel hook={rewriteHook} onClose={() => setRewriteHook(null)} />
