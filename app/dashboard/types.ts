@@ -1,8 +1,8 @@
 export interface UserProfile {
   name: string;
   niche: string;
-  platform: 'tiktok' | 'instagram' | 'youtube-short' | 'youtube-long';
-  experience: 'beginner' | 'intermediate' | 'pro';
+  platform: string;
+  experience: string;
 }
 
 export interface Hook {

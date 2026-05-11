@@ -16,13 +16,14 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('friday_profile');
-
     if (savedProfile) {
       try {
         setProfile(JSON.parse(savedProfile));
       } catch {
-        localStorage.removeItem('friday_profile');
+        setShowOnboarding(true);
       }
+    } else {
+      setShowOnboarding(true);
     }
   }, []);
 
@@ -32,12 +33,12 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
     setShowOnboarding(false);
   };
 
-  if (showOnboarding) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
   return (
     <div className="min-h-screen bg-[#FDFCF7] text-[#111111]">
+      {showOnboarding && (
+        <Onboarding onComplete={handleOnboardingComplete} />
+      )}
+
       <div className="mx-auto max-w-[1120px] px-5 py-5 sm:px-6 lg:px-8">
         <header className="mb-8 flex items-center justify-between gap-4">
           <a href="/" className="flex items-center gap-2">
@@ -56,7 +57,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               <button
                 type="button"
                 onClick={() => setShowOnboarding(true)}
-                className="hidden transition hover:text-black sm:inline"
+                className="transition hover:text-black"
               >
                 Calibrate Friday
               </button>
@@ -73,7 +74,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             <p className="mt-3 text-lg text-[#5e5a54]">
               {userPrompt
                 ? `Friday found these winners for: "${userPrompt}"`
-                : 'Pick a hook below, or head back to the homepage and describe the content you make.'}
+                : '6 hooks pulled from the viral database. Pick your winner.'}
             </p>
           </div>
 
