@@ -22,10 +22,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         setProfile(JSON.parse(savedProfile));
       } catch {
         localStorage.removeItem('friday_profile');
-        setShowOnboarding(true);
       }
-    } else {
-      setShowOnboarding(true);
     }
   }, []);
 
@@ -42,26 +39,26 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   return (
     <div className="min-h-screen bg-[#FDFCF7] text-[#111111]">
       <div className="mx-auto max-w-[1120px] px-5 py-5 sm:px-6 lg:px-8">
-        <header className="mb-10 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">F</span>
+        <header className="mb-8 flex items-center justify-between gap-4">
+          <a href="/" className="flex items-center gap-2">
+            <div className="h-9 w-9 overflow-hidden rounded-xl bg-white shadow-sm">
+              <img src="/logo_app_icon.svg" alt="Friday" className="h-full w-full object-cover" />
             </div>
             <p className="text-base font-semibold tracking-tight">Made by Friday</p>
-          </div>
+          </a>
 
           <div className="flex items-center gap-4">
-            <span className="text-xs text-[#787167] font-medium">
-              Hello, {profile?.name || 'Creator'} 🖤
+            <span className="hidden text-xs font-medium text-[#787167] sm:inline">
+              {profile ? `Hello, ${profile.name} 🖤` : 'Free viral hook engine'}
             </span>
-            <nav className="hidden items-center gap-6 text-sm text-[#555555] md:flex">
+            <nav className="flex items-center gap-4 text-sm text-[#555555]">
               <a href="/" className="transition hover:text-black">Home</a>
               <button
                 type="button"
                 onClick={() => setShowOnboarding(true)}
-                className="transition hover:text-black"
+                className="hidden transition hover:text-black sm:inline"
               >
-                Edit profile
+                Calibrate Friday
               </button>
             </nav>
           </div>
@@ -76,13 +73,13 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             <p className="mt-3 text-lg text-[#5e5a54]">
               {userPrompt
                 ? `Friday found these winners for: "${userPrompt}"`
-                : '6 hooks pulled from the viral database. Pick your winner.'}
+                : 'Pick a hook below, or head back to the homepage and describe the content you make.'}
             </p>
           </div>
 
           <div className="rounded-2xl border border-[#ece7df] bg-white px-4 py-3 text-sm text-[#5e5a54] shadow-sm">
-            <span className="font-semibold text-[#111]">Profile:</span>{' '}
-            {profile?.niche || 'Your niche'} · {profile?.platform?.replace('-', ' ') || 'platform'}
+            <span className="font-semibold text-[#111]">Context:</span>{' '}
+            {userPrompt || profile?.niche || 'general creator content'}
           </div>
         </section>
 
