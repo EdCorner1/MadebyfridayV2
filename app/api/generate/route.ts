@@ -100,7 +100,8 @@ export async function GET(request: Request) {
       return aSort - bSort;
     });
 
-    const results = sorted.length > 0 ? sorted : hooks.slice(0, 6);
+    const results = (sorted.length > 0 ? sorted : hooks.slice(0, 6).map(h => ({ hook: h, score: 0 })))
+      .filter((s): s is NonNullable<typeof sorted[0]> => s !== null);
     const selected = results.slice(0, 6).map(s => s.hook);
 
     return NextResponse.json({
