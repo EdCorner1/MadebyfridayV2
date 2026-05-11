@@ -10,7 +10,7 @@ export default function HomePage() {
       <nav className="w-full px-6 py-5 flex items-center justify-between max-w-3xl mx-auto relative z-10">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm bg-white">
-            <img src="/logo_app_icon.png" alt="Friday" className="w-full h-full object-cover" />
+            <img src="/logo_app_icon.svg" alt="Friday" className="w-full h-full object-cover" />
           </div>
           <span style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif" }} className="font-medium text-charcoal text-lg tracking-tight">Friday</span>
         </div>
