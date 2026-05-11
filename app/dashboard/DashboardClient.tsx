@@ -20,10 +20,8 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
       try {
         setProfile(JSON.parse(savedProfile));
       } catch {
-        setShowOnboarding(true);
+        localStorage.removeItem('friday_profile');
       }
-    } else {
-      setShowOnboarding(true);
     }
   }, []);
 
@@ -36,7 +34,9 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   return (
     <div className="min-h-screen bg-[#FDFCF7] text-[#111111]">
       {showOnboarding && (
-        <Onboarding onComplete={handleOnboardingComplete} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FDFCF7]/80 backdrop-blur-sm">
+          <Onboarding onComplete={handleOnboardingComplete} />
+        </div>
       )}
 
       <div className="mx-auto max-w-[1120px] px-5 py-5 sm:px-6 lg:px-8">
