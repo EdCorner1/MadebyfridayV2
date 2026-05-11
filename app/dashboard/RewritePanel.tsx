@@ -28,6 +28,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
           referenceHook: hook.name,
           referenceType: hook.type,
           userTopic: userTopic.trim(),
+          platform: localStorage.getItem('friday_profile') ? JSON.parse(localStorage.getItem('friday_profile')!).platform : 'tiktok',
         }),
       });
 

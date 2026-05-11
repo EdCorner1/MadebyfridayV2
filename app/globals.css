@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Dancing+Script:wght@400;700&display=swap');
 
 @theme {
   --color-coral: #DC2626;
@@ -36,4 +36,54 @@ html {
 ::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 3px;
+}
+
+/* PERFECTED TRACING BORDER */
+.glowing-input-container {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 2px; 
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* We use a massive rotating gradient block and a masked inner box */
+.glowing-input-container::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent, 
+    #DC2626, 
+    transparent 30%
+  );
+  animation: rotate-glow 3s linear infinite;
+  z-index: -2;
+}
+
+.glowing-input-container::after {
+  content: "";
+  position: absolute;
+  inset: 2px; 
+  background: white;
+  border-radius: 0.9rem;
+  z-index: -1;
+}
+
+@keyframes rotate-glow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { color: transparent }
+  50% { color: #DC2626; }
 }

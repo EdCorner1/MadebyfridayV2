@@ -1,80 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { NextResponse } from 'next/server';
 
-interface Hook {
-  name: string;
-  type: string;
-  url: string;
-  number: number;
-}
+// A curated set of high-converting hook patterns that we can adapt
+const HOOK_TEMPLATES = [
+  {
+    type: "The Controversial Claim",
+    template: "Stop doing [Common Action] if you actually want [Desired Result].",
+    example: "Stop posting 3 times a day if you actually want to grow your following."
+  },
+  {
+    type: "The 'Secret' Discovery",
+    template: "I found a secret way to [Achieve Goal] without [Pain Point], and it's actually insane.",
+    example: "I found a secret way to get 10k followers without spending a dime on ads, and it's actually insane."
+  },
+  {
+    type: "The Mistake Warning",
+    template: "Most people fail at [Topic] because they do [Mistake]. Do this instead.",
+    example: "Most people fail at UGC because they act like salespeople. Do this instead."
+  },
+  {
+    type: "The Result Guarantee",
+    template: "How to get [Result] in [Timeframe] (even if you are a complete beginner).",
+    example: "How to get your first brand deal in 7 days (even if you have 0 followers)."
+  },
+  {
+    type: "The Listicle Hook",
+    template: "3 tools that feel illegal to know for [Target Audience].",
+    example: "3 AI tools that feel illegal to know for content creators."
+  },
+  {
+    type: "The 'Believe Me' Proof",
+    template: "I tried [Popular Method] for 30 days so you don't have to. Here is what happened.",
+    example: "I tried the 'quantity over quality' strategy for 30 days so you don't have to. Here is what happened."
+  },
+];
 
-async function getHooks(): Promise<Hook[]> {
-  const csv = await readFile(join(process.cwd(), 'data/hooks.csv'), 'utf-8');
-  const lines = csv.split('\n').slice(1);
-  const hooks: Hook[] = lines
-    .filter(l => l.trim())
-    .map(line => {
-      const [name, type, url, number] = line.split(',');
-      return {
-        name: name?.trim() ?? '',
-        type: type?.trim() ?? '',
-        url: url?.trim() ?? '',
-        number: parseInt(number) || 0,
-      };
-    });
-  // Seed by day so same prompt always gives same 6 on the same day
-  const seed = Math.floor(Date.now() / 86400000);
-  const shuffled = [...hooks].sort((a, b) => (a.number + seed) % 1000 - (b.number + seed) % 1000);
-  return shuffled.slice(0, 6);
-}
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get('q');
 
-export async function POST(req: NextRequest) {
-  try {
-    const { prompt } = await req.json();
-
-    if (!prompt?.trim()) {
-      return NextResponse.json({ error: 'No prompt provided' }, { status: 400 });
-    }
-
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'OpenRouter API key not configured' }, { status: 500 });
-    }
-
-    const hooks = await getHooks();
-
-    // Call OpenRouter to let Friday contextualise the hooks
-    const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://madebyfriday.tech',
-        'X-Title': 'Made by Friday',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-lite-001',
-        messages: [
-          {
-            role: 'user',
-            content: `A creator just told you: "${prompt}". Here are 6 hooks from the viral database:\n\n${hooks.map((h, i) => `${i + 1}. [${h.type}] ${h.name}`).join('\n')}\n\nPick the 2 best for their prompt and explain briefly why. Keep it punchy.`,
-          },
-        ],
-        max_tokens: 400,
-      }),
-    });
-
-    const openrouterData = await openrouterRes.json();
-    const fridayNote = openrouterData?.choices?.[0]?.message?.content ?? null;
-
-    return NextResponse.json({
-      hooks,
-      fridayNote,
-      prompt,
-    });
-  } catch (err) {
-    console.error('Generate error:', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  if (!query) {
+    return NextResponse.json({ error: 'No query provided' }, { status: 400 });
   }
+
+  // Simple "Adaptation" logic to make the hooks feel relevant to the user's input
+  // In a full version, this would call an LLM to rewrite the templates based on the query.
+  const adaptedHooks = HOOK_TEMPLATES.map(hook => {
+    return {
+      ...hook,
+      adapted: `[Friday's Logic]: Adapting "${hook.template}" for ${query}...` 
+      // Temporary placeholder until we link OpenRouter for real rewriting
+    };
+  });
+
+  return NextResponse.json({
+    query,
+    hooks: adaptedHooks,
+    count: 6
+  });
 }

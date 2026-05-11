@@ -83,10 +83,18 @@ function GridCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: Ho
             {isSaved ? '✓ Saved' : "I'll use this"}
           </button>
           <button
+            onClick={onSave}
+            title="More like this"
+            className="rounded-full border border-[#ddd] px-3 py-2 text-xs text-[#555] hover:border-red-300 hover:text-red-600 transition"
+          >
+            👍
+          </button>
+          <button
             onClick={onReject}
+            title="Not for me"
             className="rounded-full border border-[#ddd] px-3 py-2 text-xs text-[#888] hover:border-[#ccc] transition"
           >
-            ✕
+            👎
           </button>
         </div>
       </div>

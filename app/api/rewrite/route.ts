@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { referenceHook, referenceType, userTopic } = await req.json();
+    const { referenceHook, referenceType, userTopic, platform } = await req.json();
 
     if (!referenceHook || !userTopic) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -16,14 +16,16 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are Friday — a viral content strategist. You help creators take a viral hook structure and rewrite it for their specific topic, audience, and platform.
 
 For every rewrite:
-- Keep the hook structure intact (same type, same emotional beat)
-- Adapt the specifics to the user's topic
-- Keep it punchy — first 3 seconds must grab attention
-- Include a suggested caption/call-to-action
-- Format as clean copy, not bullet points — ready to read directly`;
+- If platform is YouTube-long, generate an "Intro Sequence" (Hook -> Stake Setting -> The Promise -> Bridge).
+- If platform is short-form (TikTok/IG/Shorts), keep it as a punchy 3-second hook.
+- Keep the hook structure intact (same emotional beat).
+- Adapt the specifics to the user's topic.
+- Format as clean copy, not bullet points — ready to read directly.
+- Include a suggested visual/action for the first frame.`;
 
     const userPrompt = `Reference viral hook: "${referenceHook}"
 Hook type: ${referenceType}
+Target Platform: ${platform || 'General Short-form'}
 
 My content topic: ${userTopic}
 

@@ -1,9 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function HeroForm() {
   const [text, setText] = useState('');
+  const [placeholder, setPlaceholder] = useState('');
+  const phrases = [
+    "I make fitness content for 25-35 year olds...",
+    "I make AI tools content for solopreneurs...",
+    "I make minimalist home decor content for renters...",
+    "I make coding tutorials for absolute beginners...",
+  ];
+
+  useEffect(() => {
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let timeout: NodeJS.Timeout;
+
+    const type = () => {
+      const currentPhrase = phrases[phraseIndex];
+      
+      if (isDeleting) {
+        setPlaceholder(currentPhrase.substring(0, charIndex - 1));
+        charIndex--;
+      } else {
+        setPlaceholder(currentPhrase.substring(0, charIndex + 1));
+        charIndex++;
+      }
+
+      if (!isDeleting && charIndex === currentPhrase.length) {
+        isDeleting = true;
+        timeout = setTimeout(type, 2000);
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        timeout = setTimeout(type, 500);
+      } else {
+        const speed = isDeleting ? 50 : 100;
+        timeout = setTimeout(type, speed);
+      }
+    };
+
+    timeout = setTimeout(type, 500);
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,13 +54,13 @@ export default function HeroForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full mt-2">
-      <div className="relative bg-white rounded-2xl border-2 border-charcoal/10 focus-within:border-coral transition-colors shadow-sm">
+      <div className="glowing-input-container shadow-sm">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="I make fitness content for 25-35 year olds..."
+          placeholder={text === '' ? placeholder : ''}
           rows={4}
-          className="w-full px-6 pt-5 pb-4 text-charcoal bg-transparent text-base placeholder-charcoal/35 outline-none resize-none leading-relaxed"
+          className="w-full px-6 pt-5 pb-4 text-charcoal bg-transparent text-base placeholder-charcoal/35 outline-none resize-none leading-relaxed rounded-2xl"
           style={{ fontFamily: "'Inter', sans-serif" }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -28,7 +69,7 @@ export default function HeroForm() {
             }
           }}
         />
-        <div className="flex items-center justify-end px-5 pb-4">
+        <div className="flex items-center justify-end px-5 pb-4 relative z-10">
           <span className="text-xs text-charcoal/25 mr-4">press Enter to go</span>
           <button
             type="submit"
