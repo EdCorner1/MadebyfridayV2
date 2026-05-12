@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Hook } from './types';
+import { useAuth } from '../components/AuthProvider';
+import AuthModal from '../components/AuthModal';
+import { supabase } from '../lib/supabase';
 
 interface RewritePanelProps {
   hook: Hook;
@@ -9,18 +12,117 @@ interface RewritePanelProps {
 }
 
 export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
+  const { user, profile } = useAuth();
   const [userTopic, setUserTopic] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [transcriptInput, setTranscriptInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [transcriptStatus, setTranscriptStatus] = useState<string>('');
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
-  const handleRewrite = async () => {
-    if (!userTopic.trim()) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
+  // Check usage on mount
+  useEffect(() => {
+    if (!user) {
+      setAuthMode('signup');
+      return;
+    }
+    if (profile) {
+      const remaining = getRemaining(profile);
+      if (remaining <= 0) {
+        setShowUpgrade(true);
+      }
+    }
+  }, [user, profile]);
+
+  const platform = localStorage.getItem('friday_profile')
+    ? (JSON.parse(localStorage.getItem('friday_profile')!).platform || 'tiktok')
+    : 'tiktok';
+
+  const extractTranscript = async () => {
+    if (!videoUrl.trim() && !transcriptInput.trim()) return;
+
+    setExtracting(true);
+    setTranscriptStatus('');
 
     try {
+      let transcript = '';
+      let source = '';
+
+      if (videoUrl.trim()) {
+        const res = await fetch(`/api/extract-transcript?url=${encodeURIComponent(videoUrl.trim())}`);
+        const data = await res.json();
+        if (data.transcript) {
+          transcript = data.transcript;
+          source = data.source;
+        } else {
+          setTranscriptStatus(data.error || 'Could not extract. Try pasting transcript below.');
+        }
+      }
+
+      if (!transcript && transcriptInput.trim()) {
+        const res = await fetch('/api/extract-transcript', {
+          method: 'POST',
+          body: transcriptInput.trim(),
+        });
+        const data = await res.json();
+        if (data.transcript) {
+          transcript = data.transcript;
+          source = 'pasted';
+        }
+      }
+
+      if (transcript) {
+        setTranscriptInput(transcript);
+        setTranscriptStatus(`✓ Transcript loaded (${source}) — ${transcript.length} chars`);
+      }
+    } catch {
+      setTranscriptStatus('Extraction failed. Try pasting your transcript below.');
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const getSessionToken = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || '';
+  };
+
+  const handleRewrite = async () => {
+    if (!userTopic.trim() && !transcriptInput.trim()) return;
+    if (!user) { setAuthMode('signup'); return; }
+    if (showUpgrade) { return; }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Consume a script from quota first
+      const token = await getSessionToken();
+      const usageRes = await fetch('/api/scripts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const usageData = await usageRes.json();
+
+      if (!usageData.allowed) {
+        if (usageData.upgrade) {
+          setShowUpgrade(true);
+          setLoading(false);
+          return;
+        }
+        setError(usageData.error || 'No scripts available');
+        setLoading(false);
+        return;
+      }
+
+      // Now do the rewrite
       const res = await fetch('/api/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -28,12 +130,12 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
           referenceHook: hook.name,
           referenceType: hook.type,
           userTopic: userTopic.trim(),
-          platform: localStorage.getItem('friday_profile') ? JSON.parse(localStorage.getItem('friday_profile')!).platform : 'tiktok',
+          platform,
+          transcript: transcriptInput.trim() || undefined,
         }),
       });
 
       const data = await res.json();
-
       if (data.script) {
         setResult(data.script);
       } else if (data.error) {
@@ -46,6 +148,70 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
     }
   };
 
+  const hasTranscript = transcriptInput.trim().length > 0;
+  const canRewrite = userTopic.trim() || hasTranscript;
+
+  // ── Not authenticated ────────────────────────────────────────────────
+  if (!user) {
+    return (
+      <>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
+            <div className="text-4xl mb-4">🖤</div>
+            <h3 className="text-xl font-semibold text-[#111] mb-2">Sign in to rewrite scripts</h3>
+            <p className="text-sm text-[#888] mb-6">Create your free account to get 5 scripts every month. No credit card needed.</p>
+            <button
+              onClick={() => setAuthMode('signup')}
+              className="w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
+            >
+              Get started free →
+            </button>
+            <button
+              onClick={() => setAuthMode('signin')}
+              className="mt-3 text-sm text-[#888] hover:text-[#333]"
+            >
+              Already have an account? Sign in
+            </button>
+          </div>
+        </div>
+        <AuthModal
+          mode={authMode}
+          onClose={onClose}
+          onSuccess={() => { /* AuthContext will update */ }}
+        />
+      </>
+    );
+  }
+
+  // ── Upgrade prompt ───────────────────────────────────────────────────
+  if (showUpgrade) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
+          <div className="text-4xl mb-4">🔥</div>
+          <h3 className="text-xl font-semibold text-[#111] mb-2">You&apos;ve used your free scripts</h3>
+          <p className="text-sm text-[#888] mb-6">
+            You&apos;ve burned through your 5 free scripts this month. Upgrade to Pro for 15 scripts/month and full access to all 10,000 viral hooks.
+          </p>
+          <a
+            href="/#pricing"
+            onClick={onClose}
+            className="block w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
+          >
+            Upgrade to Pro →
+          </a>
+          <button
+            onClick={onClose}
+            className="mt-4 text-sm text-[#aaa] hover:text-[#666]"
+          >
+            Maybe later
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main rewrite panel ──────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-2xl bg-white rounded-[24px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -79,6 +245,72 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {!result ? (
             <div className="space-y-4">
+              {/* Script quota indicator */}
+              {profile && (() => {
+                const remaining = getRemaining(profile);
+                const total = getTotal(profile.plan);
+                if (total === -1) return null;
+                return (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#ece7df] overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-[#FF6B35] transition-all"
+                        style={{ width: `${Math.max(0, ((total - remaining) / total) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-[#aaa] whitespace-nowrap">
+                      {remaining} script{remaining !== 1 ? 's' : ''} left
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {/* Transcript section */}
+              <div>
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-widest text-[#787167]">
+                  Optional: Add a viral video to learn from
+                </label>
+
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="url"
+                    value={videoUrl}
+                    onChange={e => setVideoUrl(e.target.value)}
+                    placeholder="Paste YouTube URL to extract transcript..."
+                    className="flex-1 rounded-[10px] border border-[#ece7df] bg-[#fafaf8] px-3 py-2 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35]"
+                  />
+                  <button
+                    onClick={extractTranscript}
+                    disabled={extracting || (!videoUrl.trim() && !transcriptInput.trim())}
+                    className="rounded-[10px] bg-[#111] px-3 py-2 text-xs text-white whitespace-nowrap hover:bg-[#333] transition disabled:opacity-40"
+                  >
+                    {extracting ? 'Fetching...' : 'Extract'}
+                  </button>
+                </div>
+
+                <textarea
+                  value={transcriptInput}
+                  onChange={e => setTranscriptInput(e.target.value)}
+                  placeholder="Or paste a transcript directly — the words the viral creator actually used..."
+                  rows={4}
+                  className="w-full rounded-[10px] border border-[#ece7df] bg-[#fafaf8] p-3 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35] resize-none"
+                />
+
+                {transcriptStatus && (
+                  <p className="text-xs text-[#787167] bg-[#fafaf8] rounded-[8px] px-3 py-2">
+                    {transcriptStatus}
+                  </p>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-[#ece7df]" />
+                <span className="text-[10px] uppercase tracking-widest text-[#ccc]">or</span>
+                <div className="flex-1 h-px bg-[#ece7df]" />
+              </div>
+
+              {/* Topic input */}
               <div>
                 <label className="mb-2 block text-[11px] font-semibold uppercase tracking-widest text-[#787167]">
                   What&apos;s your angle?
@@ -86,9 +318,11 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
                 <textarea
                   value={userTopic}
                   onChange={e => setUserTopic(e.target.value)}
-                  placeholder="I'm making a TikTok about how beginners waste time at the gym. I want to hook people in the first 3 seconds with the frustration of following generic fitness advice..."
+                  placeholder={hasTranscript
+                    ? "Describe your angle — Friday will base the rewrite on the actual viral content and this description..."
+                    : "I'm making a TikTok about how beginners waste time at the gym. I want to hook people in the first 3 seconds..."}
+                  rows={3}
                   className="w-full rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35] resize-none"
-                  rows={4}
                 />
               </div>
 
@@ -98,10 +332,10 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
 
               <button
                 onClick={handleRewrite}
-                disabled={!userTopic.trim() || loading}
+                disabled={!canRewrite || loading}
                 className="w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-40"
               >
-                {loading ? 'Friday is rewriting...' : 'Rewrite my script →'}
+                {loading ? 'Friday is rewriting...' : hasTranscript ? 'Rewrite using viral transcript →' : 'Rewrite my script →'}
               </button>
 
               <p className="text-xs text-center text-[#ccc]">
@@ -138,4 +372,17 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
       </div>
     </div>
   );
+}
+
+// Helpers shared with dashboard
+export function getRemaining(profile: { plan: string; scripts_used: number }): number {
+  const limits: Record<string, number> = { free: 5, pro: 15, max: -1, lifetime: -1 };
+  const limit = limits[profile.plan] ?? 5;
+  if (limit === -1) return -1;
+  return Math.max(0, limit - (profile.scripts_used ?? 0));
+}
+
+export function getTotal(plan: string): number {
+  const limits: Record<string, number> = { free: 5, pro: 15, max: -1, lifetime: -1 };
+  return limits[plan] ?? 5;
 }
