@@ -39,7 +39,7 @@ export default function HomePage() {
           {/* Headline */}
           <h1 style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif", fontWeight: 400 }} className="text-4xl sm:text-5xl md:text-7xl text-charcoal leading-tight">
             Find your next<br />
-            <span style={{ color: '#DC2626', fontFamily: "'Dancing Script', cursive", fontWeight: 700 }}>viral hook.</span>
+            <span style={{ color: '#DC2626', fontFamily: "'Caveat', cursive", fontWeight: 600 }}>viral hook.</span>
           </h1>
 
           {/* Subheadline */}
