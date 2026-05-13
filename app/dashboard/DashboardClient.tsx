@@ -67,7 +67,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
       <div className="mx-auto max-w-[1200px] px-5 py-6 sm:px-7 lg:px-10">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="mb-8 flex items-start justify-between gap-4">
+        <header className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
             <a href="/" className="flex items-center gap-2.5 group">
               <div className="h-9 w-9 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#ece7df] group-hover:shadow-md transition-shadow">
@@ -80,10 +80,10 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             </a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Scripts remaining badge */}
             {user && profile && remaining !== null && remaining !== -1 && (
-              <div className={`hidden sm:flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+              <div className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
                 remaining <= 1
                   ? 'bg-red-50 text-red-500 ring-1 ring-red-200'
                   : remaining <= 3
@@ -99,7 +99,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
 
             {/* Plan badge */}
             {user && profile && (
-              <span className={`hidden sm:inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                 profile.plan === 'lifetime' ? 'bg-[#FFF0E8] text-[#FF6B35]' :
                 profile.plan === 'pro' ? 'bg-[#f0f0f8] text-[#555]' :
                 profile.plan === 'max' ? 'bg-[#111] text-white' :
@@ -128,13 +128,13 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               <div className="flex items-center gap-2">
                 <button
                   onClick={openSignIn}
-                  className="rounded-full px-4 py-1.5 text-xs font-medium text-[#555] hover:text-[#333] transition"
+                  className="rounded-full px-3 py-1.5 text-xs font-medium text-[#555] hover:text-[#333] transition"
                 >
                   Sign in
                 </button>
                 <button
                   onClick={openSignUp}
-                  className="rounded-full bg-[#FF6B35] px-4 py-1.5 text-xs font-medium text-white hover:opacity-90 transition"
+                  className="rounded-full bg-[#FF6B35] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition"
                 >
                   Get started free
                 </button>
@@ -144,7 +144,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             <button
               type="button"
               onClick={() => setShowOnboarding(true)}
-              className="rounded-full bg-white border border-[#ece7df] px-3.5 py-1.5 text-xs font-medium text-[#555] hover:border-[#ccc] hover:text-[#333] transition-all shadow-sm"
+              className="rounded-full bg-white border border-[#ece7df] px-3 py-1.5 text-xs font-medium text-[#555] hover:border-[#ccc] hover:text-[#333] transition-all shadow-sm"
             >
               Calibrate
             </button>
@@ -152,14 +152,14 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         </header>
 
         {/* ── Hero context bar ────────────────────────────────────────────── */}
-        <div className="relative mb-8 overflow-hidden rounded-[20px] bg-white border border-[#ece7df] p-6 shadow-sm">
+        <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-2xl sm:rounded-[20px] bg-white border border-[#ece7df] p-4 sm:p-6 shadow-sm">
           <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-gradient-to-br from-[#FF6B35]/5 to-transparent pointer-events-none" />
           <div className="absolute -right-4 bottom-0 w-20 h-20 rounded-full bg-gradient-to-tr from-[#FF6B35]/5 to-transparent pointer-events-none" />
 
-          <div className="relative flex flex-col sm:flex-row sm:items-end gap-5 justify-between">
+          <div className="relative flex flex-col gap-4 sm:gap-5 sm:flex-row sm:items-end">
             <div className="flex-1 min-w-0">
-              <div className="mb-3">
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+              <div className="mb-2 sm:mb-3">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1 text-[10px] sm:text-[10px] font-semibold uppercase tracking-wider ${
                   isLongForm
                     ? 'bg-[#f0f0f8] text-[#555]'
                     : 'bg-[#FFF0E8] text-[#FF6B35]'
@@ -172,10 +172,10 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
                 </span>
               </div>
 
-              <h1 className="text-3xl font-semibold tracking-tight text-[#111] mb-1">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#111] mb-1">
                 {userPrompt ? 'Hooks for you' : 'Your viral brain 🖤'}
               </h1>
-              <p className="text-sm text-[#888]">
+              <p className="text-xs sm:text-sm text-[#888]">
                 {userPrompt
                   ? <>Friday pulled <strong className="text-[#111]">{resultCount} hook{resultCount !== 1 ? 's' : ''}</strong> from the viral database for this topic.</>
                   : `${resultCount} hooks pulled from the viral database. Pick your winner.`}
@@ -183,8 +183,8 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             </div>
 
             {displayTopic && (
-              <div className="flex-shrink-0 rounded-full border border-[#ece7df] bg-[#fafaf8] px-4 py-2.5 text-sm text-[#555] shadow-sm">
-                <span className="text-[#aaa] text-xs mr-1.5">topic:</span>
+              <div className="flex-shrink-0 rounded-full border border-[#ece7df] bg-[#fafaf8] px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-[#555] shadow-sm">
+                <span className="text-[#aaa] text-[10px] sm:text-xs mr-1.5">topic:</span>
                 <span className="font-medium text-[#111]">&ldquo;{displayTopic}&rdquo;</span>
               </div>
             )}
