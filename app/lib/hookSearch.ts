@@ -8,9 +8,10 @@ export type RawHook = {
   sourceUrl?: string;
   randomNumber?: string | number;
   niches?: string[];
-  structures?: string[];
-  emotional_beat?: string;
-  best_for?: string;
+  mechanisms?: string[];
+  emotional_drivers?: string[];
+  best_for?: string[];
+  rewrite_strategy?: string;
 };
 
 export type HookResult = {
@@ -22,6 +23,7 @@ export type HookResult = {
   niches?: string[];
   structures?: string[];
   emotional_beat?: string;
+  rewrite_strategy?: string;
 };
 
 let cachedHooks: RawHook[] | null = null;
@@ -30,7 +32,7 @@ const NICHE_KEYWORDS: Record<string, string[]> = {
   fitness: ['fitness', 'gym', 'workout', 'running', 'body', 'muscle', 'weight loss', 'health', 'nutrition', 'cardio'],
   beauty: ['beauty', 'makeup', 'skincare', 'skin', 'hair', 'nails'],
   food: ['food', 'recipe', 'cooking', 'cook', 'meal', 'chef', 'restaurant'],
-  tech: ['tech', 'ai', 'software', 'app', 'coding', 'developer', 'programming', 'saas', 'tool', 'startup', 'automation', 'chatgpt'],
+  tech_ai: ['tech', 'ai', 'software', 'app', 'coding', 'developer', 'programming', 'saas', 'tool', 'startup', 'automation', 'chatgpt'],
   finance: ['finance', 'money', 'investing', 'stock', 'crypto', 'budget', 'income', 'wealth', 'side hustle'],
   fashion: ['fashion', 'style', 'outfit', 'clothes', 'wardrobe'],
   business: ['business', 'founder', 'startup', 'sales', 'marketing', 'client', 'agency', 'brand', 'revenue'],
@@ -39,17 +41,21 @@ const NICHE_KEYWORDS: Record<string, string[]> = {
   parenting: ['parent', 'baby', 'kid', 'child', 'family', 'mom', 'dad'],
   gaming: ['gaming', 'game', 'gamer', 'twitch', 'streamer'],
   productivity: ['productivity', 'focus', 'habit', 'routine', 'time management'],
-  home: ['home', 'decor', 'interior', 'apartment', 'house', 'room'],
-  creator: ['creator', 'content', 'social media', 'ugc', 'viral', 'algorithm', 'followers'],
+  lifestyle: ['home', 'decor', 'interior', 'apartment', 'house', 'room', 'routine', 'day in the life'],
+  creator_ugc: ['creator', 'content', 'social media', 'ugc', 'viral', 'algorithm', 'followers', 'brand deal', 'sponsor'],
 };
 
-const STRUCTURE_KEYWORDS: Record<string, string[]> = {
-  story: ['story', 'storytime', 'personal', 'experience', 'journey'],
-  contrarian: ['hot take', 'controversial', 'wrong', 'mistake', 'avoid', 'stop', 'unpopular'],
-  educational: ['teach', 'tutorial', 'explain', 'learn', 'tips', 'how to', 'guide'],
-  list: ['list', 'top', 'best', 'things', 'ways', 'hacks'],
-  proof: ['proof', 'study', 'research', 'expert', 'data', 'results'],
-  relatable: ['relatable', 'pov', 'everyone', 'feels', 'struggle'],
+const MECHANISM_KEYWORDS: Record<string, string[]> = {
+  personal_story: ['story', 'storytime', 'personal', 'experience', 'journey', 'day in the life'],
+  contrarian: ['hot take', 'controversial', 'wrong', 'mistake', 'avoid', 'stop', 'unpopular', 'myth'],
+  how_to: ['teach', 'tutorial', 'explain', 'learn', 'tips', 'how to', 'guide', 'show me'],
+  numbered_list: ['list', 'top', 'best', 'things', 'ways', 'hacks', 'tools'],
+  authority_proof: ['proof', 'study', 'research', 'expert', 'data', 'results', 'case study'],
+  identity_callout: ['freelancers', 'creators', 'founders', 'beginners', 'busy', 'if you'],
+  product_demo: ['tool', 'app', 'review', 'demo', 'product', 'ugc'],
+  comparison: ['compare', 'versus', 'vs', 'better', 'alternative'],
+  future_consequence: ['avoid', 'future', 'mistake', 'dont want', 'end up'],
+  transformation: ['before', 'after', 'from scratch', 'build', 'grow'],
 };
 
 function normalise(input = ''): string {
@@ -81,16 +87,16 @@ function getQuerySignals(query: string) {
     niches: Object.entries(NICHE_KEYWORDS)
       .filter(([, keywords]) => queryMatches(query, keywords))
       .map(([niche]) => niche),
-    structures: Object.entries(STRUCTURE_KEYWORDS)
+    mechanisms: Object.entries(MECHANISM_KEYWORDS)
       .filter(([, keywords]) => queryMatches(query, keywords))
-      .map(([structure]) => structure),
+      .map(([mechanism]) => mechanism),
   };
 }
 
 export async function loadHooks(): Promise<RawHook[]> {
   if (cachedHooks) return cachedHooks;
 
-  const raw = await readFile(join(process.cwd(), 'data', 'hooks.json'), 'utf-8');
+  const raw = await readFile(join(process.cwd(), 'data', 'hooks_enriched.json'), 'utf-8');
   cachedHooks = JSON.parse(raw) as RawHook[];
   return cachedHooks;
 }
@@ -103,8 +109,10 @@ export async function searchHooks(query = '', limit = 6): Promise<HookResult[]> 
   const scored = hooks.map((hook) => {
     const template = normalise(hook.template);
     const type = normalise(hook.hookType);
-    const bestFor = normalise(hook.best_for);
-    const combined = `${template} ${type} ${bestFor}`;
+    const bestFor = normalise((hook.best_for ?? []).join(' '));
+    const mechanisms = normalise((hook.mechanisms ?? []).join(' '));
+    const emotions = normalise((hook.emotional_drivers ?? []).join(' '));
+    const combined = `${template} ${type} ${bestFor} ${mechanisms} ${emotions}`;
 
     let score = 0;
 
@@ -113,16 +121,18 @@ export async function searchHooks(query = '', limit = 6): Promise<HookResult[]> 
     }
 
     for (const niche of signals.niches) {
-      if (hook.niches?.includes(niche)) score += 8;
+      if (hook.niches?.includes(niche)) score += 10;
+      if (hook.niches?.includes('general')) score += 2;
       if (queryMatches(combined, NICHE_KEYWORDS[niche] ?? [])) score += 3;
     }
 
-    for (const structure of signals.structures) {
-      if (hook.structures?.includes(structure)) score += 5;
-      if (queryMatches(combined, STRUCTURE_KEYWORDS[structure] ?? [])) score += 2;
+    for (const mechanism of signals.mechanisms) {
+      if (hook.mechanisms?.includes(mechanism)) score += 8;
+      if (queryMatches(combined, MECHANISM_KEYWORDS[mechanism] ?? [])) score += 2;
     }
 
     if (hook.sourceUrl?.includes('instagram.com')) score += 1;
+    if (hook.rewrite_strategy) score += 1;
     score += deterministicJitter(hook, seed) * 1.25;
 
     return { hook, score };
@@ -131,13 +141,18 @@ export async function searchHooks(query = '', limit = 6): Promise<HookResult[]> 
   const sorted = scored.sort((a, b) => b.score - a.score);
   const selected: typeof scored = [];
   const usedTypes = new Set<string>();
+  const usedMechanisms = new Set<string>();
 
   for (const item of sorted) {
     if (selected.length >= limit) break;
     const type = item.hook.hookType ?? 'unknown';
-    if (!usedTypes.has(type) || selected.length >= Math.ceil(limit / 2)) {
+    const primaryMechanism = item.hook.mechanisms?.[0] ?? 'general';
+    const duplicatePattern = usedTypes.has(type) && usedMechanisms.has(primaryMechanism);
+
+    if (!duplicatePattern || selected.length >= Math.ceil(limit / 2)) {
       selected.push(item);
       usedTypes.add(type);
+      usedMechanisms.add(primaryMechanism);
     }
   }
 
@@ -153,7 +168,8 @@ export async function searchHooks(query = '', limit = 6): Promise<HookResult[]> 
     number: Number(hook.randomNumber ?? hook.id ?? 0),
     score: Math.round(score * 100) / 100,
     niches: hook.niches,
-    structures: hook.structures,
-    emotional_beat: hook.emotional_beat,
+    structures: hook.mechanisms,
+    emotional_beat: hook.emotional_drivers?.join(', '),
+    rewrite_strategy: hook.rewrite_strategy,
   }));
 }

@@ -9,5 +9,6 @@ export async function getHooksFromQuery(query: string): Promise<Hook[]> {
     type: hook.type,
     url: hook.url,
     number: hook.number,
+    rewrite_strategy: hook.rewrite_strategy,
   }));
 }

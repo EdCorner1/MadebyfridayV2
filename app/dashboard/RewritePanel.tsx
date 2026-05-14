@@ -117,6 +117,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
           userTopic: userTopic.trim(),
           platform: getSavedPlatform(),
           transcript: transcriptInput.trim() || undefined,
+          rewriteStrategy: hook.rewrite_strategy,
         }),
       });
 

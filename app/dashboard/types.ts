@@ -13,4 +13,5 @@ export interface Hook {
   number: number;
   rating?: 'up' | 'down';
   saved?: boolean;
+  rewrite_strategy?: string;
 }
