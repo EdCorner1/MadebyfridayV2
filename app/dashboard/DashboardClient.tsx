@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import HookGrid from './HookGrid';
 import Onboarding from '../components/Onboarding';
@@ -17,10 +18,12 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ initialHooks, userPrompt }: DashboardClientProps) {
+  const router = useRouter();
   const { user, profile, loading, signOut } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
+  const [searchQuery, setSearchQuery] = useState(userPrompt);
   const {
     workspace,
     setProfile: setCreatorProfile,
@@ -29,6 +32,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
     unsaveHook,
     resetRejectedHooks,
   } = useLocalWorkspace();
+
 
   const handleOnboardingComplete = (newProfile: CreatorProfile) => {
     setCreatorProfile(newProfile);
@@ -43,6 +47,14 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const resultCount = initialHooks.length;
 
   const remaining = profile ? getScriptsRemaining(profile) : null;
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+    router.push(`/dashboard?q=${encodeURIComponent(query)}`);
+  };
+
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#111111]">
@@ -189,6 +201,24 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
           </div>
         </div>
 
+        <form onSubmit={handleSearch} className="mb-6 flex flex-col gap-2 rounded-[18px] border border-[#ece7df] bg-white p-3 shadow-sm sm:flex-row">
+          <label htmlFor="dashboard-search" className="sr-only">Search for another content idea</label>
+          <input
+            id="dashboard-search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search another content idea..."
+            className="min-w-0 flex-1 rounded-full bg-[#fafaf8] px-4 py-2.5 text-sm text-[#111] outline-none placeholder:text-[#aaa] focus:ring-2 focus:ring-[#FF6B35]/20"
+          />
+          <button
+            type="submit"
+            disabled={!searchQuery.trim()}
+            className="rounded-full bg-[#111] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#333] disabled:opacity-35"
+          >
+            Find hooks
+          </button>
+        </form>
+
         {/* ── Hook grid ──────────────────────────────────────────────────── */}
         <HookGrid
           initialHooks={initialHooks}
@@ -202,7 +232,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
 
         {/* ── Footer ─────────────────────────────────────────────────────── */}
         <footer className="mt-12 text-center text-xs text-[#ccc]">
-          <p>© 2026 Made by Friday — {user ? 'Workspace active' : 'Sign up to save hooks and track your scripts'}</p>
+          <p>© 2026 Made by Friday — {user ? 'Workspace active' : 'Saved hooks stay on this device'}</p>
         </footer>
       </div>
     </div>
