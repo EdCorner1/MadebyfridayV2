@@ -121,10 +121,14 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
           userLabel={profile?.name ?? user?.email?.split('@')[0] ?? 'Creator'}
           planLabel={planLabel(profile?.plan)}
           scriptsLabel={scriptsLabel}
+          isSignedIn={Boolean(user)}
           onNewSearch={() => document.getElementById('dashboard-search')?.focus()}
           onEditProfile={() => setShowOnboarding(true)}
           onRewrite={setRewriteHook}
           onUnsave={unsaveHook}
+          onSignIn={openSignIn}
+          onSignUp={openSignUp}
+          onSignOut={signOut}
         />
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">

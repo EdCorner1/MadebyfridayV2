@@ -7,15 +7,27 @@ type DashboardSidebarProps = {
   userLabel: string;
   planLabel: string;
   scriptsLabel: string | null;
+  isSignedIn: boolean;
   onNewSearch: () => void;
   onEditProfile: () => void;
   onRewrite: (hook: Hook) => void;
   onUnsave: (url: string) => void;
+  onSignIn: () => void;
+  onSignUp: () => void;
+  onSignOut: () => void;
 };
 
 function initials(name?: string | null) {
   if (!name) return 'F';
   return name.trim().slice(0, 1).toUpperCase();
+}
+
+function NavButton({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
+      {children}
+    </button>
+  );
 }
 
 export default function DashboardSidebar({
@@ -24,13 +36,17 @@ export default function DashboardSidebar({
   userLabel,
   planLabel,
   scriptsLabel,
+  isSignedIn,
   onNewSearch,
   onEditProfile,
   onRewrite,
   onUnsave,
+  onSignIn,
+  onSignUp,
+  onSignOut,
 }: DashboardSidebarProps) {
   return (
-    <aside className="hidden w-[260px] shrink-0 border-r border-[#ece7df] bg-white/75 px-4 py-5 lg:sticky lg:top-0 lg:block lg:h-screen">
+    <aside className="hidden w-[264px] shrink-0 border-r border-[#ece7df] bg-white/80 px-4 py-5 lg:sticky lg:top-0 lg:block lg:h-screen">
       <div className="flex h-full flex-col gap-5">
         <div className="flex items-center gap-2.5">
           <Image src="/logo_app_icon.svg" alt="Friday" width={36} height={36} className="rounded-xl" />
@@ -63,23 +79,15 @@ export default function DashboardSidebar({
         </div>
 
         <nav className="space-y-1 text-sm">
-          <button type="button" onClick={onNewSearch} className="w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
-            New search
-          </button>
-          <button type="button" className="w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
-            Saved hooks ({savedHooks.length})
-          </button>
-          <button type="button" className="w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
-            Planner
-          </button>
-          <button type="button" onClick={onEditProfile} className="w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
-            Creator profile
-          </button>
+          <NavButton onClick={onNewSearch}>New search</NavButton>
+          <NavButton>Saved hooks ({savedHooks.length})</NavButton>
+          <NavButton>Planner</NavButton>
+          <NavButton onClick={onEditProfile}>Creator profile</NavButton>
         </nav>
 
         <div className="min-h-0 flex-1 overflow-y-auto rounded-[18px] border border-[#ece7df] bg-white p-3">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Saved</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Saved hooks</p>
             <span className="text-xs text-[#bbb]">{savedHooks.length}</span>
           </div>
 
@@ -100,6 +108,23 @@ export default function DashboardSidebar({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-[18px] border border-[#ece7df] bg-[#fafaf8] p-3">
+          {isSignedIn ? (
+            <button type="button" onClick={onSignOut} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777] hover:text-[#333]">
+              Sign out
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#FF6B35] px-3 py-2 text-xs font-medium text-white">
+                Get 10 free rewrites
+              </button>
+              <button type="button" onClick={onSignIn} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777]">
+                Sign in
+              </button>
             </div>
           )}
         </div>
