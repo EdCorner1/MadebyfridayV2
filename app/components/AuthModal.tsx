@@ -63,7 +63,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
-          <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-[#FF6B35] flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-[#DC2626] flex items-center justify-center">
             <span className="text-2xl">🖤</span>
           </div>
           <h2 className="text-xl font-semibold text-[#111]">
@@ -112,7 +112,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
                 placeholder="Your name"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#FF6B35]"
+                className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#DC2626]"
                 required
               />
             )}
@@ -121,7 +121,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
               placeholder="Email address"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#FF6B35]"
+              className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#DC2626]"
               required
             />
             <input
@@ -129,7 +129,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
               placeholder="Password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#FF6B35]"
+              className="w-full rounded-[12px] border border-[#ece7df] bg-[#fafaf8] px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#DC2626]"
               required
               minLength={6}
             />
@@ -141,7 +141,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-50"
+              className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-50"
             >
               {loading ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create account'}
             </button>
@@ -151,7 +151,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
             {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
             <button
               onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
-              className="font-medium text-[#FF6B35] hover:underline"
+              className="font-medium text-[#DC2626] hover:underline"
             >
               {mode === 'signin' ? 'Sign up free' : 'Sign in'}
             </button>

@@ -20,7 +20,7 @@ function getHost(url: string): string {
 function PreviewTile({ hook, index }: { hook: Hook; index: number }) {
   return (
     <div className="group relative aspect-[9/16] w-full overflow-hidden rounded-[16px] bg-[#111] text-left shadow-sm">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,107,53,0.72),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(220,38,38,0.72),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
       <div className="absolute inset-0 bg-black/10" />
 
       <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#111]">
@@ -59,7 +59,7 @@ export default function HookCard({ hook, index, isSaved, onSave, onReject, onRew
           <button
             type="button"
             onClick={onRewrite}
-            className="rounded-full bg-[#FF6B35] px-3 py-2 text-xs font-medium text-white transition hover:bg-red-700"
+            className="rounded-full bg-[#DC2626] px-3 py-2 text-xs font-medium text-white transition hover:bg-red-700"
           >
             Rewrite this
           </button>
@@ -67,7 +67,7 @@ export default function HookCard({ hook, index, isSaved, onSave, onReject, onRew
             type="button"
             onClick={onSave}
             className={`rounded-full px-3 py-2 text-xs font-medium transition ${
-              isSaved ? 'bg-[#FFF0E8] text-[#FF6B35]' : 'border border-[#ddd] text-[#555] hover:border-[#ccc]'
+              isSaved ? 'bg-[#FEF2F2] text-[#DC2626]' : 'border border-[#ddd] text-[#555] hover:border-[#ccc]'
             }`}
           >
             {isSaved ? 'Saved' : 'Save'}

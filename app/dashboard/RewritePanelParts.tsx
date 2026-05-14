@@ -16,7 +16,7 @@ export function AuthRequiredPrompt({
         <button
           type="button"
           onClick={() => setAuthMode('signup')}
-          className="w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
+          className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90"
         >
           Get started free →
         </button>
@@ -44,7 +44,7 @@ export function UpgradePrompt({ onClose }: { onClose: () => void }) {
         <Link
           href="/upgrade"
           onClick={onClose}
-          className="block w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
+          className="block w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90"
         >
           Upgrade →
         </Link>
@@ -111,7 +111,7 @@ export function QuotaBar({ profile }: { profile: Profile }) {
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 rounded-full bg-[#ece7df] overflow-hidden">
         <div
-          className="h-full rounded-full bg-[#FF6B35] transition-all"
+          className="h-full rounded-full bg-[#DC2626] transition-all"
           style={{ width: `${Math.max(0, ((total - remaining) / total) * 100)}%` }}
         />
       </div>
@@ -151,7 +151,7 @@ export function TranscriptInput({
           value={videoUrl}
           onChange={(event) => onVideoUrlChange(event.target.value)}
           placeholder="Paste YouTube URL to extract transcript..."
-          className="flex-1 rounded-[10px] border border-[#ece7df] bg-[#fafaf8] px-3 py-2 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35]"
+          className="flex-1 rounded-[10px] border border-[#ece7df] bg-[#fafaf8] px-3 py-2 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#DC2626]"
         />
         <button
           type="button"
@@ -168,7 +168,7 @@ export function TranscriptInput({
         onChange={(event) => onTranscriptChange(event.target.value)}
         placeholder="Or paste a transcript directly — the words the viral creator actually used..."
         rows={4}
-        className="w-full rounded-[10px] border border-[#ece7df] bg-[#fafaf8] p-3 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35] resize-none"
+        className="w-full rounded-[10px] border border-[#ece7df] bg-[#fafaf8] p-3 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#DC2626] resize-none"
       />
 
       {transcriptStatus && (
@@ -199,7 +199,7 @@ export function TopicInput({
           ? 'Describe your angle — Friday will base the rewrite on the actual viral content and this description...'
           : "I'm making a TikTok about how beginners waste time at the gym. I want to hook people in the first 3 seconds..."}
         rows={3}
-        className="w-full rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#FF6B35] resize-none"
+        className="w-full rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#DC2626] resize-none"
       />
     </div>
   );
@@ -219,7 +219,7 @@ export function RewriteResult({
         <button
           type="button"
           onClick={() => navigator.clipboard.writeText(result)}
-          className="text-xs text-[#FF6B35] hover:underline"
+          className="text-xs text-[#DC2626] hover:underline"
         >
           Copy to clipboard
         </button>

@@ -58,7 +58,7 @@ export default function DashboardSidebar({
 
         <div className="rounded-[18px] border border-[#ece7df] bg-[#fafaf8] p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FF6B35] font-semibold text-white">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#DC2626] font-semibold text-white">
               {initials(profile?.name || userLabel)}
             </div>
             <div className="min-w-0">
@@ -119,7 +119,7 @@ export default function DashboardSidebar({
             </button>
           ) : (
             <div className="space-y-2">
-              <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#FF6B35] px-3 py-2 text-xs font-medium text-white">
+              <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#DC2626] px-3 py-2 text-xs font-medium text-white">
                 Get 10 free rewrites
               </button>
               <button type="button" onClick={onSignIn} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777]">

@@ -188,7 +188,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
             type="button"
             onClick={handleRewrite}
             disabled={!canRewrite || loading}
-            className="w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-40"
+            className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-40"
           >
             {loading ? 'Friday is rewriting...' : hasTranscript ? 'Rewrite using viral transcript →' : 'Rewrite my script →'}
           </button>

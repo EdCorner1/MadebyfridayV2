@@ -41,13 +41,13 @@ export default function PlannerSidebar({ savedHooks, onUnsave, onRewrite }: Plan
                     href={hook.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] text-[#FF6B35] hover:underline whitespace-nowrap"
+                    className="text-[10px] text-[#DC2626] hover:underline whitespace-nowrap"
                   >
                     View →
                   </a>
                   <button
                     onClick={() => onRewrite(hook)}
-                    className="rounded-full bg-[#FF6B35] px-2.5 py-1 text-[10px] text-white whitespace-nowrap hover:opacity-90 transition"
+                    className="rounded-full bg-[#DC2626] px-2.5 py-1 text-[10px] text-white whitespace-nowrap hover:opacity-90 transition"
                   >
                     Rewrite
                   </button>

@@ -144,7 +144,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               ) : (
                 <>
                   <button onClick={openSignIn} className="rounded-full px-3 py-1.5 text-xs font-medium text-[#555]">Sign in</button>
-                  <button onClick={openSignUp} className="rounded-full bg-[#FF6B35] px-3 py-1.5 text-xs font-medium text-white">Get started free</button>
+                  <button onClick={openSignUp} className="rounded-full bg-[#DC2626] px-3 py-1.5 text-xs font-medium text-white">Get started free</button>
                 </>
               )}
               <button onClick={() => setShowOnboarding(true)} className="rounded-full bg-white border border-[#ece7df] px-3 py-1.5 text-xs font-medium text-[#555]">
@@ -157,7 +157,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <span className={`mb-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider ${
-                  isLongForm ? 'bg-[#f0f0f8] text-[#555]' : 'bg-[#FFF0E8] text-[#FF6B35]'
+                  isLongForm ? 'bg-[#f0f0f8] text-[#555]' : 'bg-[#FEF2F2] text-[#DC2626]'
                 }`}>
                   {isLongForm ? '📺 Long-form YouTube' : '🎬 Short-form / TikTok'}
                 </span>
@@ -187,7 +187,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search another content idea..."
-              className="min-w-0 flex-1 rounded-full bg-[#fafaf8] px-4 py-2.5 text-sm text-[#111] outline-none placeholder:text-[#aaa] focus:ring-2 focus:ring-[#FF6B35]/20"
+              className="min-w-0 flex-1 rounded-full bg-[#fafaf8] px-4 py-2.5 text-sm text-[#111] outline-none placeholder:text-[#aaa] focus:ring-2 focus:ring-[#DC2626]/20"
             />
             <button type="submit" disabled={!searchQuery.trim()} className="rounded-full bg-[#111] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#333] disabled:opacity-35">
               New search
