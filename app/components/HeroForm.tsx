@@ -76,7 +76,7 @@ export default function HeroForm() {
       }}
       className="hero-input-shell text-left shadow-[0_24px_80px_rgba(17,17,17,0.08)]"
     >
-      <div className="hero-input-panel">
+      <div className="hero-input-panel relative">
         <label htmlFor="hero-prompt" className="sr-only">
           Describe the content you make
         </label>
@@ -94,23 +94,20 @@ export default function HeroForm() {
             }
           }}
           placeholder={placeholder}
-          rows={4}
-          className="min-h-32 w-full resize-none rounded-[18px] bg-[#FAFAF8] px-5 py-4 text-base leading-7 text-charcoal outline-none placeholder:text-charcoal/30 focus:ring-2 focus:ring-coral/15"
+          rows={5}
+          className="min-h-44 w-full resize-none rounded-[18px] bg-[#FAFAF8] px-5 pb-16 pt-5 text-base leading-7 text-charcoal outline-none placeholder:text-charcoal/30 focus:ring-2 focus:ring-coral/15"
         />
 
-        <div className="mt-3 flex items-center justify-between gap-3 px-1">
-          <p className="hidden text-xs text-charcoal/35 sm:block">Press Enter to generate ideas</p>
-          <button
-            type="submit"
-            disabled={!text.trim()}
-            aria-label="Find hooks"
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-charcoal text-white transition hover:bg-charcoal/85 focus:outline-none focus:ring-2 focus:ring-coral/25 disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          aria-label="Find hooks"
+          className="absolute bottom-6 right-6 flex h-11 w-11 items-center justify-center rounded-full bg-charcoal text-white transition hover:bg-charcoal/85 focus:outline-none focus:ring-2 focus:ring-coral/25 disabled:cursor-not-allowed disabled:bg-charcoal/25 disabled:text-white"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
       </div>
     </form>
   );
