@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HookGrid from './HookGrid';
 import Onboarding from '../components/Onboarding';
 import AuthModal from '../components/AuthModal';
@@ -11,6 +11,7 @@ import { useAuth } from '../components/AuthProvider';
 import { getScriptsRemaining } from '../lib/quota';
 import { Hook, CreatorProfile } from './types';
 import { useLocalWorkspace } from './localWorkspace';
+import { loadWorkspaceFromSupabase, mergeWorkspaces, saveWorkspaceToSupabase } from '../lib/workspaceSync';
 
 interface DashboardClientProps {
   initialHooks: Hook[];
@@ -26,6 +27,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const [searchQuery, setSearchQuery] = useState(userPrompt);
   const {
     workspace,
+    replaceWorkspace,
     setProfile: setCreatorProfile,
     saveHook,
     rejectHook,
@@ -38,6 +40,39 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
     setCreatorProfile(newProfile);
     setShowOnboarding(false);
   };
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let cancelled = false;
+
+    const syncWorkspace = async () => {
+      const remoteWorkspace = await loadWorkspaceFromSupabase(user.id);
+      if (cancelled) return;
+
+      const merged = mergeWorkspaces(workspace, remoteWorkspace);
+      replaceWorkspace(merged);
+      await saveWorkspaceToSupabase(user.id, merged);
+    };
+
+    void syncWorkspace();
+
+    return () => {
+      cancelled = true;
+    };
+  // Run once per authenticated user; workspace changes are handled by the persistence effect below.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const timer = setTimeout(() => {
+      void saveWorkspaceToSupabase(user.id, workspace);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [user?.id, workspace]);
+
 
   const openSignIn = () => { setAuthMode('signin'); setShowAuth(true); };
   const openSignUp = () => { setAuthMode('signup'); setShowAuth(true); };

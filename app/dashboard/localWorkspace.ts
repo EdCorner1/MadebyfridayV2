@@ -100,6 +100,12 @@ export function useLocalWorkspace() {
     });
   };
 
+  const replaceWorkspace = (workspace: LocalWorkspace) => {
+    const next = normaliseWorkspace(workspace);
+    saveWorkspace(next);
+    setWorkspaceState(next);
+  };
+
   const setProfile = (profile: CreatorProfile) => {
     updateWorkspace((current) => ({ ...current, profile }));
   };
@@ -133,6 +139,7 @@ export function useLocalWorkspace() {
 
   return {
     workspace,
+    replaceWorkspace,
     setProfile,
     saveHook,
     rejectHook,

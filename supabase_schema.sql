@@ -12,9 +12,12 @@ CREATE TABLE IF NOT EXISTS profiles (
   plan TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'pro', 'max', 'lifetime')),
   scripts_used INTEGER NOT NULL DEFAULT 0,
   scripts_reset_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  workspace_data JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS workspace_data JSONB;
 
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
