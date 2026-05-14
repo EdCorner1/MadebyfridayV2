@@ -6,27 +6,36 @@ import PlannerSidebar from './PlannerSidebar';
 import RewritePanel from './RewritePanel';
 import { Hook } from './types';
 
-function readStoredSet(key: string): Set<string> {
-  if (typeof window === 'undefined') return new Set();
+type HookGridProps = {
+  initialHooks: Hook[];
+  savedHookUrls: string[];
+  rejectedHookUrls: string[];
+  onSaveHook: (url: string) => void;
+  onRejectHook: (url: string) => void;
+  onUnsaveHook: (url: string) => void;
+  onResetRejectedHooks: () => void;
+};
 
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
-  } catch {
-    localStorage.removeItem(key);
-    return new Set();
-  }
-}
-
-export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
+export default function HookGrid({
+  initialHooks,
+  savedHookUrls,
+  rejectedHookUrls,
+  onSaveHook,
+  onRejectHook,
+  onUnsaveHook,
+  onResetRejectedHooks,
+}: HookGridProps) {
   const [hooks] = useState<Hook[]>(initialHooks);
-  const [savedIds, setSavedIds] = useState<Set<string>>(() => readStoredSet('mbf_saved'));
-  const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => readStoredSet('mbf_rejected'));
   const [rewriteHook, setRewriteHook] = useState<Hook | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [lightboxPostId, setLightboxPostId] = useState<string | null>(null);
   const [lightboxLoading, setLightboxLoading] = useState(false);
+
+  const savedIds = new Set(savedHookUrls);
+  const rejectedIds = new Set(rejectedHookUrls);
+  const savedHooks = hooks.filter((hook) => savedIds.has(hook.url));
+  const remainingHooks = hooks.filter((hook) => !rejectedIds.has(hook.url));
 
   const openLightbox = async (url: string) => {
     setLightboxUrl(url);
@@ -49,50 +58,32 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
     setLightboxPostId(null);
   };
 
-  const handleSave = (id: string) => {
-    const newSaved = new Set(savedIds);
-    newSaved.add(id);
-    setSavedIds(newSaved);
-    localStorage.setItem('mbf_saved', JSON.stringify([...newSaved]));
-    const newRejected = new Set(rejectedIds);
-    if (newRejected.has(id)) {
-      newRejected.delete(id);
-      setRejectedIds(newRejected);
-      localStorage.setItem('mbf_rejected', JSON.stringify([...newRejected]));
-    }
-  };
-
-  const handleReject = (id: string) => {
-    const newRejected = new Set(rejectedIds);
-    newRejected.add(id);
-    setRejectedIds(newRejected);
-    localStorage.setItem('mbf_rejected', JSON.stringify([...newRejected]));
-    const newSaved = new Set(savedIds);
-    if (newSaved.has(id)) {
-      newSaved.delete(id);
-      setSavedIds(newSaved);
-      localStorage.setItem('mbf_saved', JSON.stringify([...newSaved]));
-    }
-  };
-
-  const handleUnsave = (id: string) => {
-    const newSaved = new Set(savedIds);
-    newSaved.delete(id);
-    setSavedIds(newSaved);
-    localStorage.setItem('mbf_saved', JSON.stringify([...newSaved]));
-  };
-
-  const savedHooks = hooks.filter(h => savedIds.has(h.url));
-  const remainingHooks = hooks.filter(h => !rejectedIds.has(h.url));
+  const renderHooks = () => (
+    <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3' : 'space-y-4'}>
+      {remainingHooks.map((hook, index) => (
+        <HookCard
+          key={hook.url || `${hook.name}-${index}`}
+          hook={hook}
+          index={index}
+          isSaved={savedIds.has(hook.url)}
+          onSave={() => onSaveHook(hook.url)}
+          onReject={() => onRejectHook(hook.url)}
+          variant={view}
+          onPreviewClick={() => openLightbox(hook.url)}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <>
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm text-[#787167] font-medium">
-          {remainingHooks.length} ideas · {savedIds.size} saved
+          {remainingHooks.length} ideas · {savedHookUrls.length} saved
         </p>
         <div className="flex items-center gap-1 rounded-full bg-white border border-[#ece7df] p-1">
           <button
+            type="button"
             onClick={() => setView('grid')}
             className={`rounded-full px-3 py-1.5 text-xs transition ${
               view === 'grid' ? 'bg-[#111] text-white' : 'text-[#888] hover:text-[#333]'
@@ -101,6 +92,7 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
             ▦ Grid
           </button>
           <button
+            type="button"
             onClick={() => setView('list')}
             className={`rounded-full px-3 py-1.5 text-xs transition ${
               view === 'list' ? 'bg-[#111] text-white' : 'text-[#888] hover:text-[#333]'
@@ -111,63 +103,30 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
         </div>
       </div>
 
-      {view === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3">
-          {remainingHooks.map((hook, i) => (
-            <HookCard
-              key={hook.url || `${hook.name}-${i}`}
-              hook={hook}
-              index={i}
-              isSaved={savedIds.has(hook.url)}
-              onSave={() => handleSave(hook.url)}
-              onReject={() => handleReject(hook.url)}
-              variant="grid"
-              onPreviewClick={() => openLightbox(hook.url)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {remainingHooks.map((hook, i) => (
-            <HookCard
-              key={hook.url || `${hook.name}-${i}`}
-              hook={hook}
-              index={i}
-              isSaved={savedIds.has(hook.url)}
-              onSave={() => handleSave(hook.url)}
-              onReject={() => handleReject(hook.url)}
-              variant="list"
-              onPreviewClick={() => openLightbox(hook.url)}
-            />
-          ))}
-        </div>
-      )}
+      {renderHooks()}
 
-      {rejectedIds.size > 0 && (
+      {rejectedHookUrls.length > 0 && (
         <button
-          onClick={() => {
-            setRejectedIds(new Set());
-            localStorage.setItem('mbf_rejected', JSON.stringify([]));
-          }}
+          type="button"
+          onClick={onResetRejectedHooks}
           className="mt-4 text-sm text-[#999] underline hover:text-[#555] transition"
         >
-          Reset rejected ({rejectedIds.size})
+          Reset rejected ({rejectedHookUrls.length})
         </button>
       )}
 
-      <PlannerSidebar savedHooks={savedHooks} onUnsave={handleUnsave} onRewrite={setRewriteHook} />
+      <PlannerSidebar savedHooks={savedHooks} onUnsave={onUnsaveHook} onRewrite={setRewriteHook} />
 
       {rewriteHook && <RewritePanel hook={rewriteHook} onClose={() => setRewriteHook(null)} />}
 
-      {/* Lightbox */}
       {lightboxUrl && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           onClick={closeLightbox}
         >
-          <div className="relative w-full max-w-[400px]" onClick={e => e.stopPropagation()}>
-            {/* Close button */}
+          <div className="relative w-full max-w-[400px]" onClick={(event) => event.stopPropagation()}>
             <button
+              type="button"
               onClick={closeLightbox}
               className="absolute -top-10 right-0 text-white text-sm flex items-center gap-1 hover:opacity-80 transition"
             >

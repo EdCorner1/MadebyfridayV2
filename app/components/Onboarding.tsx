@@ -2,13 +2,13 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { UserProfile } from '../dashboard/types';
+import { CreatorProfile } from '../dashboard/types';
 
 const PLATFORMS = ['tiktok', 'instagram', 'youtube-short', 'youtube-long'] as const;
 const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'pro'] as const;
 
-export default function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
-  const [profile, setProfile] = useState<UserProfile>({
+export default function Onboarding({ onComplete }: { onComplete: (profile: CreatorProfile) => void }) {
+  const [profile, setProfile] = useState<CreatorProfile>({
     name: '',
     niche: '',
     platform: 'tiktok',

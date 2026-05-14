@@ -1,4 +1,4 @@
-export interface UserProfile {
+export interface CreatorProfile {
   name: string;
   niche: string;
   platform: string;
@@ -14,4 +14,3 @@ export interface Hook {
   rating?: 'up' | 'down';
   saved?: boolean;
 }
-

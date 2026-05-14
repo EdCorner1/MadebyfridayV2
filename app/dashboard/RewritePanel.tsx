@@ -15,6 +15,7 @@ import {
   TranscriptInput,
   UpgradePrompt,
 } from './RewritePanelParts';
+import { loadWorkspace } from './localWorkspace';
 
 interface RewritePanelProps {
   hook: Hook;
@@ -22,15 +23,7 @@ interface RewritePanelProps {
 }
 
 function getSavedPlatform(): string {
-  if (typeof window === 'undefined') return 'tiktok';
-
-  try {
-    const savedProfile = localStorage.getItem('friday_profile');
-    if (!savedProfile) return 'tiktok';
-    return JSON.parse(savedProfile).platform || 'tiktok';
-  } catch {
-    return 'tiktok';
-  }
+  return loadWorkspace().profile?.platform || 'tiktok';
 }
 
 async function getSessionToken() {

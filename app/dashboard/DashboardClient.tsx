@@ -8,7 +8,8 @@ import Onboarding from '../components/Onboarding';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../components/AuthProvider';
 import { getScriptsRemaining } from '../lib/quota';
-import { Hook, UserProfile } from './types';
+import { Hook, CreatorProfile } from './types';
+import { useLocalWorkspace } from './localWorkspace';
 
 interface DashboardClientProps {
   initialHooks: Hook[];
@@ -20,29 +21,25 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
-  const [profileData, setProfileData] = useState<UserProfile | null>(() => {
-    if (typeof window === 'undefined') return null;
+  const {
+    workspace,
+    setProfile: setCreatorProfile,
+    saveHook,
+    rejectHook,
+    unsaveHook,
+    resetRejectedHooks,
+  } = useLocalWorkspace();
 
-    try {
-      const savedProfile = localStorage.getItem('friday_profile');
-      return savedProfile ? JSON.parse(savedProfile) as UserProfile : null;
-    } catch {
-      localStorage.removeItem('friday_profile');
-      return null;
-    }
-  });
-
-  const handleOnboardingComplete = (newProfile: UserProfile) => {
-    localStorage.setItem('friday_profile', JSON.stringify(newProfile));
-    setProfileData(newProfile);
+  const handleOnboardingComplete = (newProfile: CreatorProfile) => {
+    setCreatorProfile(newProfile);
     setShowOnboarding(false);
   };
 
   const openSignIn = () => { setAuthMode('signin'); setShowAuth(true); };
   const openSignUp = () => { setAuthMode('signup'); setShowAuth(true); };
 
-  const isLongForm = profileData?.platform === 'youtube-long';
-  const displayTopic = userPrompt || profileData?.niche || null;
+  const isLongForm = workspace.profile?.platform === 'youtube-long';
+  const displayTopic = userPrompt || workspace.profile?.niche || null;
   const resultCount = initialHooks.length;
 
   const remaining = profile ? getScriptsRemaining(profile) : null;
@@ -193,7 +190,15 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         </div>
 
         {/* ── Hook grid ──────────────────────────────────────────────────── */}
-        <HookGrid initialHooks={initialHooks} />
+        <HookGrid
+          initialHooks={initialHooks}
+          savedHookUrls={workspace.savedHookUrls}
+          rejectedHookUrls={workspace.rejectedHookUrls}
+          onSaveHook={saveHook}
+          onRejectHook={rejectHook}
+          onUnsaveHook={unsaveHook}
+          onResetRejectedHooks={resetRejectedHooks}
+        />
 
         {/* ── Footer ─────────────────────────────────────────────────────── */}
         <footer className="mt-12 text-center text-xs text-[#ccc]">
