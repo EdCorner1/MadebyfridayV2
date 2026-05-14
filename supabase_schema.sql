@@ -13,11 +13,15 @@ CREATE TABLE IF NOT EXISTS profiles (
   scripts_used INTEGER NOT NULL DEFAULT 0,
   scripts_reset_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   workspace_data JSONB,
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS workspace_data JSONB;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

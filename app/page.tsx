@@ -3,6 +3,7 @@ import Link from 'next/link';
 import './globals.css';
 import HeroForm from './components/HeroForm';
 import FloatingSocialIcons from './components/FloatingSocialIcons';
+import PricingSection from './components/PricingSection';
 
 export default function HomePage() {
   return (
@@ -51,6 +52,7 @@ export default function HomePage() {
           </p>
         </section>
       </div>
+      <PricingSection />
     </main>
   );
 }
