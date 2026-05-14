@@ -192,7 +192,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         {/* ── Hook grid ──────────────────────────────────────────────────── */}
         <HookGrid
           initialHooks={initialHooks}
-          savedHookUrls={workspace.savedHookUrls}
+          savedHooks={workspace.savedHooks}
           rejectedHookUrls={workspace.rejectedHookUrls}
           onSaveHook={saveHook}
           onRejectHook={rejectHook}

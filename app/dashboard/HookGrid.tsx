@@ -8,9 +8,9 @@ import { Hook } from './types';
 
 type HookGridProps = {
   initialHooks: Hook[];
-  savedHookUrls: string[];
+  savedHooks: Hook[];
   rejectedHookUrls: string[];
-  onSaveHook: (url: string) => void;
+  onSaveHook: (hook: Hook) => void;
   onRejectHook: (url: string) => void;
   onUnsaveHook: (url: string) => void;
   onResetRejectedHooks: () => void;
@@ -18,7 +18,7 @@ type HookGridProps = {
 
 export default function HookGrid({
   initialHooks,
-  savedHookUrls,
+  savedHooks,
   rejectedHookUrls,
   onSaveHook,
   onRejectHook,
@@ -32,9 +32,8 @@ export default function HookGrid({
   const [lightboxPostId, setLightboxPostId] = useState<string | null>(null);
   const [lightboxLoading, setLightboxLoading] = useState(false);
 
-  const savedIds = new Set(savedHookUrls);
+  const savedIds = new Set(savedHooks.map((hook) => hook.url));
   const rejectedIds = new Set(rejectedHookUrls);
-  const savedHooks = hooks.filter((hook) => savedIds.has(hook.url));
   const remainingHooks = hooks.filter((hook) => !rejectedIds.has(hook.url));
 
   const openLightbox = async (url: string) => {
@@ -66,7 +65,7 @@ export default function HookGrid({
           hook={hook}
           index={index}
           isSaved={savedIds.has(hook.url)}
-          onSave={() => onSaveHook(hook.url)}
+          onSave={() => onSaveHook(hook)}
           onReject={() => onRejectHook(hook.url)}
           variant={view}
           onPreviewClick={() => openLightbox(hook.url)}
@@ -79,7 +78,7 @@ export default function HookGrid({
     <>
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm text-[#787167] font-medium">
-          {remainingHooks.length} ideas · {savedHookUrls.length} saved
+          {remainingHooks.length} ideas · {savedHooks.length} saved
         </p>
         <div className="flex items-center gap-1 rounded-full bg-white border border-[#ece7df] p-1">
           <button

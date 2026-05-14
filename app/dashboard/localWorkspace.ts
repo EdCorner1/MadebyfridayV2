@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreatorProfile } from './types';
+import { CreatorProfile, Hook } from './types';
 
 const STORAGE_KEY = 'mbf_workspace';
 const LEGACY_PROFILE_KEY = 'friday_profile';
@@ -8,18 +8,28 @@ const LEGACY_REJECTED_KEY = 'mbf_rejected';
 
 export type LocalWorkspace = {
   profile: CreatorProfile | null;
-  savedHookUrls: string[];
+  savedHooks: Hook[];
   rejectedHookUrls: string[];
 };
 
 const EMPTY_WORKSPACE: LocalWorkspace = {
   profile: null,
-  savedHookUrls: [],
+  savedHooks: [],
   rejectedHookUrls: [],
 };
 
 function unique(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))];
+}
+
+function uniqueHooks(hooks: Hook[]): Hook[] {
+  const seen = new Set<string>();
+  return hooks.filter((hook) => {
+    const key = hook.url || `${hook.name}-${hook.number}`;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function parseJson<T>(value: string | null, fallback: T): T {
@@ -38,22 +48,36 @@ function migrateLegacyWorkspace(): LocalWorkspace {
 
   return {
     profile,
-    savedHookUrls: unique(savedHookUrls),
+    savedHooks: unique(savedHookUrls).map((url, index) => ({
+      name: 'Saved hook from previous session',
+      type: 'Saved hook',
+      url,
+      number: index,
+    })),
     rejectedHookUrls: unique(rejectedHookUrls),
+  };
+}
+
+function normaliseWorkspace(workspace: Partial<LocalWorkspace> & { savedHookUrls?: string[] }): LocalWorkspace {
+  const migratedSavedHooks = workspace.savedHooks ?? workspace.savedHookUrls?.map((url, index) => ({
+    name: 'Saved hook from previous session',
+    type: 'Saved hook',
+    url,
+    number: index,
+  })) ?? [];
+
+  return {
+    profile: workspace.profile ?? null,
+    savedHooks: uniqueHooks(migratedSavedHooks),
+    rejectedHookUrls: unique(workspace.rejectedHookUrls ?? []),
   };
 }
 
 export function loadWorkspace(): LocalWorkspace {
   if (typeof window === 'undefined') return EMPTY_WORKSPACE;
 
-  const saved = parseJson<LocalWorkspace | null>(localStorage.getItem(STORAGE_KEY), null);
-  if (saved) {
-    return {
-      profile: saved.profile ?? null,
-      savedHookUrls: unique(saved.savedHookUrls ?? []),
-      rejectedHookUrls: unique(saved.rejectedHookUrls ?? []),
-    };
-  }
+  const saved = parseJson<Partial<LocalWorkspace> | null>(localStorage.getItem(STORAGE_KEY), null);
+  if (saved) return normaliseWorkspace(saved);
 
   const migrated = migrateLegacyWorkspace();
   saveWorkspace(migrated);
@@ -62,50 +86,49 @@ export function loadWorkspace(): LocalWorkspace {
 
 export function saveWorkspace(workspace: LocalWorkspace) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    profile: workspace.profile,
-    savedHookUrls: unique(workspace.savedHookUrls),
-    rejectedHookUrls: unique(workspace.rejectedHookUrls),
-  }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normaliseWorkspace(workspace)));
 }
 
 export function useLocalWorkspace() {
   const [workspace, setWorkspaceState] = useState<LocalWorkspace>(() => loadWorkspace());
 
-  const setWorkspace = (next: LocalWorkspace) => {
-    saveWorkspace(next);
-    setWorkspaceState(next);
+  const updateWorkspace = (recipe: (current: LocalWorkspace) => LocalWorkspace) => {
+    setWorkspaceState((current) => {
+      const next = normaliseWorkspace(recipe(current));
+      saveWorkspace(next);
+      return next;
+    });
   };
 
   const setProfile = (profile: CreatorProfile) => {
-    setWorkspace({ ...workspace, profile });
+    updateWorkspace((current) => ({ ...current, profile }));
   };
 
-  const saveHook = (url: string) => {
-    setWorkspace({
-      ...workspace,
-      savedHookUrls: unique([...workspace.savedHookUrls, url]),
-      rejectedHookUrls: workspace.rejectedHookUrls.filter((savedUrl) => savedUrl !== url),
-    });
+  const saveHook = (hook: Hook) => {
+    updateWorkspace((current) => ({
+      ...current,
+      savedHooks: uniqueHooks([...current.savedHooks, hook]),
+      rejectedHookUrls: current.rejectedHookUrls.filter((url) => url !== hook.url),
+    }));
   };
 
   const rejectHook = (url: string) => {
-    setWorkspace({
-      ...workspace,
-      rejectedHookUrls: unique([...workspace.rejectedHookUrls, url]),
-      savedHookUrls: workspace.savedHookUrls.filter((savedUrl) => savedUrl !== url),
-    });
+    updateWorkspace((current) => ({
+      ...current,
+      rejectedHookUrls: unique([...current.rejectedHookUrls, url]),
+      savedHooks: current.savedHooks.filter((hook) => hook.url !== url),
+    }));
   };
 
   const unsaveHook = (url: string) => {
-    setWorkspace({
-      ...workspace,
-      savedHookUrls: workspace.savedHookUrls.filter((savedUrl) => savedUrl !== url),
-    });
+    updateWorkspace((current) => ({
+      ...current,
+      savedHooks: current.savedHooks.filter((hook) => hook.url !== url),
+    }));
   };
 
   const resetRejectedHooks = () => {
-    setWorkspace({ ...workspace, rejectedHookUrls: [] });
+    updateWorkspace((current) => ({ ...current, rejectedHookUrls: [] }));
   };
 
   return {
