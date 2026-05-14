@@ -9,8 +9,8 @@ export default function BillingCancelPage() {
         <p className="mt-3 text-sm leading-6 text-charcoal/55">
           No payment was taken. The pricing goblin has been returned to its enclosure.
         </p>
-        <Link href="/#pricing" className="mt-6 inline-flex rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white">
-          Back to pricing →
+        <Link href="/upgrade" className="mt-6 inline-flex rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white">
+          Back to upgrade →
         </Link>
       </div>
     </main>

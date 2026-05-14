@@ -8,7 +8,7 @@ import HookGrid from './HookGrid';
 import Onboarding from '../components/Onboarding';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../components/AuthProvider';
-import { getScriptsRemaining } from '../lib/quota';
+import { getScriptLimit, getScriptsRemaining } from '../lib/quota';
 import { Hook, CreatorProfile } from './types';
 import { useLocalWorkspace } from './localWorkspace';
 import { loadWorkspaceFromSupabase, mergeWorkspaces, saveWorkspaceToSupabase } from '../lib/workspaceSync';
@@ -137,7 +137,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               }`}>
                 <span>{remaining}</span>
                 <span className="text-[#aaa]">/</span>
-                <span>{profile.plan === 'free' ? '5' : profile.plan === 'pro' ? '15' : '∞'}</span>
+                <span>{getScriptLimit(profile.plan) === -1 ? '∞' : getScriptLimit(profile.plan)}</span>
                 <span className="text-[10px] text-[#bbb] ml-0.5">scripts</span>
               </div>
             )}

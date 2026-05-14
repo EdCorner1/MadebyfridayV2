@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
-import { PLANS } from '../lib/plans';
+import { PUBLIC_PLANS } from '../lib/plans';
 
 export default function PricingSection() {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function PricingSection() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        {PLANS.map((plan) => (
+        {PUBLIC_PLANS.map((plan) => (
           <article
             key={plan.id}
             className={`rounded-[24px] border bg-white p-5 shadow-sm ${

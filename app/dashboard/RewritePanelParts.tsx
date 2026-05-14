@@ -12,7 +12,7 @@ export function AuthRequiredPrompt({
       <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
         <div className="text-4xl mb-4">🖤</div>
         <h3 className="text-xl font-semibold text-[#111] mb-2">Sign in to rewrite scripts</h3>
-        <p className="text-sm text-[#888] mb-6">Create your free account to get 5 scripts every month. No credit card needed.</p>
+        <p className="text-sm text-[#888] mb-6">Create your free account to save your workspace and get 10 free rewrites/month. No credit card needed.</p>
         <button
           type="button"
           onClick={() => setAuthMode('signup')}
@@ -42,7 +42,7 @@ export function UpgradePrompt({ onClose }: { onClose: () => void }) {
           You&apos;ve burned through your free scripts this month. Upgrade for more rewrites and full access to the viral hook engine.
         </p>
         <Link
-          href="/#pricing"
+          href="/upgrade"
           onClick={onClose}
           className="block w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
         >

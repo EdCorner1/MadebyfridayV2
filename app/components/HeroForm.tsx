@@ -103,9 +103,12 @@ export default function HeroForm() {
           <button
             type="submit"
             disabled={!text.trim()}
-            className="ml-auto rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white transition hover:bg-charcoal/85 disabled:cursor-not-allowed disabled:opacity-35"
+            aria-label="Find hooks"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-charcoal text-white transition hover:bg-charcoal/85 focus:outline-none focus:ring-2 focus:ring-coral/25 disabled:cursor-not-allowed disabled:opacity-35"
           >
-            Find hooks →
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>

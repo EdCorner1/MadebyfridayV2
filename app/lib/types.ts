@@ -13,8 +13,8 @@ export interface Profile {
 }
 
 export const SCRIPT_LIMITS: Record<Plan, number> = {
-  free: 5,
-  pro: 15,
+  free: 10,
+  pro: -1,
   max: -1,
   lifetime: -1,
 };

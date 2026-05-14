@@ -3,7 +3,6 @@ import Link from 'next/link';
 import './globals.css';
 import HeroForm from './components/HeroForm';
 import FloatingSocialIcons from './components/FloatingSocialIcons';
-import PricingSection from './components/PricingSection';
 
 export default function HomePage() {
   return (
@@ -30,7 +29,7 @@ export default function HomePage() {
 
         <section className="flex flex-1 flex-col items-center justify-center pb-20 pt-10 text-center">
           <p className="mb-5 rounded-full border border-charcoal/10 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-charcoal/45">
-            Viral hooks from real creator data
+            Trained on patterns from 10,000+ viral videos
           </p>
 
           <h1 className="font-display text-5xl font-medium leading-[0.98] tracking-[-0.04em] text-charcoal sm:text-6xl md:text-7xl">
@@ -48,11 +47,10 @@ export default function HomePage() {
           </div>
 
           <p className="mt-4 text-xs text-charcoal/35">
-            No signup needed to start · Built for short-form creators
+            Search first. Sign in when you’re ready to rewrite.
           </p>
         </section>
       </div>
-      <PricingSection />
     </main>
   );
 }

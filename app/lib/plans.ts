@@ -11,6 +11,7 @@ export type PlanConfig = {
   description: string;
   cta: string;
   featured?: boolean;
+  public?: boolean;
   stripePriceEnv?: string;
 };
 
@@ -20,42 +21,48 @@ export const PLANS: PlanConfig[] = [
     name: 'Free',
     price: '$0',
     interval: 'forever',
-    scripts: '5 scripts/month',
-    description: 'Try Friday with enough room to see if the hooks actually slap.',
+    scripts: '10 rewrites/month',
+    description: 'Search hooks, save ideas, and try Friday before handing over money like a responsible adult.',
     cta: 'Start free',
+    public: true,
+  },
+  {
+    id: 'lifetime',
+    name: 'Founding Pro',
+    price: '$19',
+    interval: 'one-time',
+    scripts: 'Unlimited everything',
+    description: 'First 100 creators only. Lifetime access, planner, and Friday as your content coach.',
+    cta: 'Claim founding deal',
+    featured: true,
+    public: true,
+    stripePriceEnv: 'STRIPE_PRICE_LIFETIME',
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: '$15',
+    price: '$19',
     interval: 'per month',
-    scripts: '15 scripts/month',
-    description: 'For creators actively making weekly content and testing ideas.',
+    scripts: 'Unlimited everything',
+    description: 'The post-founding monthly plan. Early monthly users keep legacy pricing as Friday improves.',
     cta: 'Upgrade to Pro',
-    featured: true,
+    public: false,
     stripePriceEnv: 'STRIPE_PRICE_PRO_MONTHLY',
   },
   {
     id: 'max',
-    name: 'Max',
-    price: '$29',
-    interval: 'per month',
-    scripts: 'Unlimited scripts',
-    description: 'For creators who want Friday as a daily scripting gremlin.',
-    cta: 'Go unlimited',
+    name: 'Pro Max',
+    price: 'TBD',
+    interval: 'later',
+    scripts: 'Advanced models and deeper strategy',
+    description: 'Future higher-tier plan. Not part of the launch offer.',
+    cta: 'Coming later',
+    public: false,
     stripePriceEnv: 'STRIPE_PRICE_MAX_MONTHLY',
   },
-  {
-    id: 'lifetime',
-    name: 'Founding',
-    price: '$19',
-    interval: 'one-time',
-    scripts: 'Lifetime access',
-    description: 'First 100 founding members. Ridiculously early, deliberately generous.',
-    cta: 'Claim founding deal',
-    stripePriceEnv: 'STRIPE_PRICE_LIFETIME',
-  },
 ];
+
+export const PUBLIC_PLANS = PLANS.filter((plan) => plan.public);
 
 export function getPaidPlan(id: string): PlanConfig | null {
   const plan = PLANS.find((item) => item.id === id && item.id !== 'free');

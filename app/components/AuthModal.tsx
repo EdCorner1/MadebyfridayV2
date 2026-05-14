@@ -72,7 +72,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
           <p className="mt-1 text-sm text-[#888]">
             {mode === 'signin'
               ? 'Sign in to access your viral hooks and scripts'
-              : 'Start with 5 free scripts. No credit card needed.'}
+              : 'Start with 10 free rewrites. No credit card needed.'}
           </p>
         </div>
 

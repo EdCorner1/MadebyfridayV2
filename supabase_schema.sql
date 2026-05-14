@@ -97,9 +97,6 @@ CREATE POLICY "Anyone can read founding count" ON founding_members
   FOR SELECT USING (true);
 
 -- ============================================================
--- ✅ Done! Your schema is ready.
--- Next: add these to Vercel env vars:
---   NEXT_PUBLIC_SUPABASE_URL=https://fbzlisaqwabyotgbnpfw.supabase.co
---   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiemxpc2Fxd2FieW90Z2JucGZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNjk0ODcsImV4cCI6MjA5Mzc0NTQ4N30.7z5W0aqP2hG1aDiEifU4yEtjUDWB5ewoSJpGvBfQ_kI
---   SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiemxpc2Fxd2FieW90Z2JucGZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODE2OTQ4NywiZXhwIjoyMDkzNzQ1NDg3fQ==
+-- ✅ Done. Add required runtime secrets via Vercel/Supabase dashboards.
+-- Never commit real service-role keys or API secrets into this file.
 -- ============================================================
