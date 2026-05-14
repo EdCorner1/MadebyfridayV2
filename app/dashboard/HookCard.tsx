@@ -10,89 +10,80 @@ interface HookCardProps {
   onPreviewClick?: () => void;
 }
 
-function InstagramEmbed({ url }: { url: string }) {
-  const match = url.match(/instagram\.com\/(?:p|reel|tv)\/([^\/\?]+)/);
-  const postId = match ? match[1] : null;
-  if (!postId) return null;
+function getHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return 'source';
+  }
+}
 
+function PreviewTile({ hook, index, compact = false, onClick }: {
+  hook: Hook;
+  index: number;
+  compact?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-[10px] border border-[#ece7df] bg-[#fafaf8] cursor-pointer"
-      onClick={() => window.open(url, '_blank')}
-      style={{ paddingTop: '100%' }}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group relative w-full overflow-hidden rounded-[14px] border border-[#ece7df] bg-[#111] text-left shadow-sm ${compact ? 'aspect-square' : 'aspect-[4/3]'}`}
     >
-      <div className="absolute inset-0">
-        <iframe
-          src={`https://www.instagram.com/p/${postId}/embed/captioned/`}
-          className="absolute inset-0 w-full h-full"
-          frameBorder="0"
-          scrolling="no"
-          allowTransparency={true}
-          title="Instagram video preview"
-          style={{ background: 'transparent' }}
-          sandbox="allow-scripts allow-same-origin allow-forms"
-        />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,107,53,0.75),transparent_35%),linear-gradient(135deg,#171717,#2b211c_45%,#ff6b35)]" />
+      <div className="absolute inset-0 bg-black/10 transition group-hover:bg-black/0" />
+
+      <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#111]">
+        {getHost(hook.url)}
       </div>
-      {/* Play overlay hint */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/10 pointer-events-none">
-        <div className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#333">
+      <div className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-1 text-[9px] font-semibold text-white">
+        #{index + 1}
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#111] shadow-sm transition group-hover:scale-105">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
+        {!compact && (
+          <p className="line-clamp-2 text-xs font-medium leading-snug text-white/88">
+            Watch original reference
+          </p>
+        )}
       </div>
-    </div>
+    </button>
   );
 }
 
-// GRID variant — thumb-friendly, mobile-first
 function GridCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: HookCardProps) {
   return (
-    <article className="flex flex-col rounded-[16px] border border-[#ece7df] bg-white overflow-hidden hover:shadow-sm transition-shadow">
-      <div className="relative" onClick={onPreviewClick}>
-        <InstagramEmbed url={hook.url} />
-        <div className="absolute top-2 left-2">
-          <span className="rounded-full bg-black/60 backdrop-blur-sm px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white">
-            {hook.type.split(' ')[0]}
-          </span>
-        </div>
-        <div className="absolute bottom-2 right-2">
-          <span className="rounded-full bg-white/90 backdrop-blur-sm px-2 py-0.5 text-[9px] font-semibold text-[#333]">
-            #{index + 1}
-          </span>
-        </div>
-      </div>
+    <article className="flex flex-col rounded-[18px] border border-[#ece7df] bg-white p-3.5 shadow-sm transition-shadow hover:shadow-md">
+      <PreviewTile hook={hook} index={index} onClick={onPreviewClick} />
 
-      <div className="flex flex-col flex-1 p-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#787167] mb-1">
+      <div className="flex flex-1 flex-col pt-3.5">
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#787167]">
           {hook.type}
         </p>
-        <p className="text-[12px] font-medium text-[#111] leading-snug line-clamp-3 flex-1">
+        <p className="line-clamp-4 flex-1 text-sm font-medium leading-snug text-[#111]">
           {hook.name}
         </p>
 
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-2">
           <button
+            type="button"
             onClick={onSave}
             className={`flex-1 rounded-full py-2 text-xs font-medium transition ${
-              isSaved
-                ? 'bg-[#FF6B35] text-white'
-                : 'bg-[#111] text-white hover:bg-[#333]'
+              isSaved ? 'bg-[#FF6B35] text-white' : 'bg-[#111] text-white hover:bg-[#333]'
             }`}
           >
             {isSaved ? '✓ Saved' : "I'll use this"}
           </button>
           <button
-            onClick={onSave}
-            title="More like this"
-            className="rounded-full border border-[#ddd] px-3 py-2 text-xs text-[#555] hover:border-red-300 hover:text-red-600 transition"
-          >
-            👍
-          </button>
-          <button
+            type="button"
             onClick={onReject}
             title="Not for me"
-            className="rounded-full border border-[#ddd] px-3 py-2 text-xs text-[#888] hover:border-[#ccc] transition"
+            className="rounded-full border border-[#ddd] px-3 py-2 text-xs text-[#888] transition hover:border-[#ccc]"
           >
             👎
           </button>
@@ -102,19 +93,15 @@ function GridCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: Ho
   );
 }
 
-// LIST variant — detailed, desktop-friendly
 function ListCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: HookCardProps) {
   return (
-    <article className="rounded-[16px] border border-[#ece7df] bg-white p-4 flex gap-4">
-      <div
-        className="w-28 flex-shrink-0 cursor-pointer"
-        onClick={onPreviewClick}
-      >
-        <InstagramEmbed url={hook.url} />
+    <article className="flex gap-4 rounded-[18px] border border-[#ece7df] bg-white p-4 shadow-sm">
+      <div className="w-28 flex-shrink-0">
+        <PreviewTile hook={hook} index={index} compact onClick={onPreviewClick} />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2 mb-2 flex-wrap">
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex flex-wrap items-start gap-2">
           <span className="rounded-full bg-[#f7f4ee] px-2 py-0.5 text-[10px] font-semibold text-[#555]">
             #{index + 1}
           </span>
@@ -122,39 +109,46 @@ function ListCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: Ho
             {hook.type}
           </span>
         </div>
-        <p className="text-sm font-semibold text-[#111] leading-snug mb-2">
-          {hook.name}
-        </p>
+        <p className="mb-3 text-sm font-semibold leading-snug text-[#111]">{hook.name}</p>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           <button
+            type="button"
             onClick={onPreviewClick}
-            className="flex items-center gap-1.5 rounded-full bg-[#FF6B35] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 transition"
+            className="flex items-center gap-1.5 rounded-full bg-[#FF6B35] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90"
           >
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z" />
             </svg>
             Watch video
           </button>
+          <a
+            href={hook.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-[#ece7df] px-3 py-1.5 text-xs text-[#777] transition hover:text-[#333]"
+          >
+            Open source ↗
+          </a>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 min-w-[100px]">
+      <div className="flex min-w-[100px] flex-col gap-2">
         {isSaved ? (
           <>
             <button disabled className="rounded-full bg-[#FF6B35] py-2 text-xs text-white opacity-80">
               ✓ Saved
             </button>
-            <button onClick={onReject} className="rounded-full border border-black/10 py-2 text-xs text-[#555] hover:bg-[#f7f4ee] transition">
+            <button type="button" onClick={onReject} className="rounded-full border border-black/10 py-2 text-xs text-[#555] transition hover:bg-[#f7f4ee]">
               Not for me
             </button>
           </>
         ) : (
           <>
-            <button onClick={onSave} className="rounded-full bg-[#111] py-2 text-xs text-white hover:bg-[#333] transition">
+            <button type="button" onClick={onSave} className="rounded-full bg-[#111] py-2 text-xs text-white transition hover:bg-[#333]">
               I&apos;ll use this
             </button>
-            <button onClick={onReject} className="rounded-full border border-black/10 py-2 text-xs text-[#555] hover:bg-[#f7f4ee] transition">
+            <button type="button" onClick={onReject} className="rounded-full border border-black/10 py-2 text-xs text-[#555] transition hover:bg-[#f7f4ee]">
               Not for me
             </button>
           </>
