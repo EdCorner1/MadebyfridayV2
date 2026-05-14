@@ -158,7 +158,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
           </p>
 
           <p className="mt-3 text-center text-xs text-[#ccc]">
-            By continuing, you agree to Made by Friday's Terms of Service.
+            By continuing, you agree to Made by Friday&apos;s Terms of Service.
           </p>
         </div>
       </div>

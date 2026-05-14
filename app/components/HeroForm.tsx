@@ -1,86 +1,56 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+const EXAMPLE_PROMPT = 'I make AI tool videos for freelancers who want to save time';
 
 export default function HeroForm() {
+  const router = useRouter();
   const [text, setText] = useState('');
-  const [placeholder, setPlaceholder] = useState('');
-  const phrases = [
-    "I make fitness content for 25-35 year olds...",
-    "I make AI tools content for solopreneurs...",
-    "I make minimalist home decor content for renters...",
-    "I make coding tutorials for absolute beginners...",
-  ];
 
-  useEffect(() => {
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let timeout: NodeJS.Timeout;
-
-    const type = () => {
-      const currentPhrase = phrases[phraseIndex];
-      
-      if (isDeleting) {
-        setPlaceholder(currentPhrase.substring(0, charIndex - 1));
-        charIndex--;
-      } else {
-        setPlaceholder(currentPhrase.substring(0, charIndex + 1));
-        charIndex++;
-      }
-
-      if (!isDeleting && charIndex === currentPhrase.length) {
-        isDeleting = true;
-        timeout = setTimeout(type, 2000);
-      } else if (isDeleting && charIndex === 0) {
-        isDeleting = false;
-        phraseIndex = (phraseIndex + 1) % phrases.length;
-        timeout = setTimeout(type, 500);
-      } else {
-        const speed = isDeleting ? 50 : 100;
-        timeout = setTimeout(type, speed);
-      }
-    };
-
-    timeout = setTimeout(type, 500);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!text.trim()) return;
-    window.location.href = `/dashboard?q=${encodeURIComponent(text.trim())}`;
+  const submit = () => {
+    const query = text.trim();
+    if (!query) return;
+    router.push(`/dashboard?q=${encodeURIComponent(query)}`);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full mt-2">
-      <div className="glowing-input-container shadow-sm">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={text === '' ? placeholder : ''}
-          rows={4}
-          className="w-full px-6 pt-5 pb-4 text-charcoal bg-transparent text-base placeholder-charcoal/35 outline-none resize-none leading-relaxed rounded-2xl"
-          style={{ fontFamily: "'Inter', sans-serif" }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit(e);
-            }
-          }}
-        />
-        <div className="flex items-center justify-end px-5 pb-4 relative z-10">
-          <span className="text-xs text-charcoal/25 mr-4">press Enter to go</span>
-          <button
-            type="submit"
-            className="w-9 h-9 flex items-center justify-center bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-            aria-label="Go"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+      className="rounded-[24px] border border-charcoal/10 bg-white p-3 text-left shadow-[0_24px_80px_rgba(17,17,17,0.08)]"
+    >
+      <label htmlFor="hero-prompt" className="sr-only">
+        Describe the content you make
+      </label>
+
+      <textarea
+        id="hero-prompt"
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            submit();
+          }
+        }}
+        placeholder={EXAMPLE_PROMPT}
+        rows={4}
+        className="min-h-32 w-full resize-none rounded-[18px] bg-[#FAFAF8] px-5 py-4 text-base leading-7 text-charcoal outline-none placeholder:text-charcoal/30 focus:ring-2 focus:ring-coral/20"
+      />
+
+      <div className="mt-3 flex items-center justify-between gap-3 px-1">
+        <p className="hidden text-xs text-charcoal/35 sm:block">Press Enter to generate ideas</p>
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          className="ml-auto rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white transition hover:bg-charcoal/85 disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          Find hooks →
+        </button>
       </div>
     </form>
   );

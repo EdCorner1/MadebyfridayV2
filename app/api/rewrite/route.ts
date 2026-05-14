@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+type RewriteRequest = {
+  referenceHook?: string;
+  referenceType?: string;
+  userTopic?: string;
+  platform?: string;
+  transcript?: string;
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const { referenceHook, referenceType, userTopic, platform } = await req.json();
+    const { referenceHook, referenceType, userTopic, platform, transcript } = await req.json() as RewriteRequest;
 
-    if (!referenceHook || !userTopic) {
+    if (!referenceHook || (!userTopic && !transcript)) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
@@ -13,23 +21,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
-    const systemPrompt = `You are Friday — a viral content strategist. You help creators take a viral hook structure and rewrite it for their specific topic, audience, and platform.
+    const systemPrompt = `You are Friday — a sharp viral content strategist.
 
-For every rewrite:
-- If platform is YouTube-long, generate an "Intro Sequence" (Hook -> Stake Setting -> The Promise -> Bridge).
-- If platform is short-form (TikTok/IG/Shorts), keep it as a punchy 3-second hook.
-- Keep the hook structure intact (same emotional beat).
-- Adapt the specifics to the user's topic.
-- Format as clean copy, not bullet points — ready to read directly.
-- Include a suggested visual/action for the first frame.`;
+Rewrite creator content using the reference hook's emotional structure.
+- Short-form: write a punchy 3-second hook plus a tight follow-up beat.
+- YouTube-long: write an intro sequence: Hook -> Stakes -> Promise -> Bridge.
+- Preserve the emotional mechanic, not the exact words.
+- If a transcript is provided, use its concrete details and rhythm.
+- Format as ready-to-read copy. No preamble. No explanation.`;
 
-    const userPrompt = `Reference viral hook: "${referenceHook}"
-Hook type: ${referenceType}
-Target Platform: ${platform || 'General Short-form'}
+    const userPrompt = `Reference hook: "${referenceHook}"
+Hook type: ${referenceType ?? 'Unknown'}
+Platform: ${platform ?? 'short-form'}
+Topic/angle: ${userTopic ?? 'Use transcript context'}
+${transcript ? `\nTranscript to learn from:\n${transcript.slice(0, 3500)}` : ''}
 
-My content topic: ${userTopic}
-
-Rewrite this hook for my topic. Keep the same structure and emotional punch. Output ONLY the rewritten script — no commentary, no preamble.`;
+Output only the rewritten script.`;
 
     const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -49,16 +56,20 @@ Rewrite this hook for my topic. Keep the same structure and emotional punch. Out
       }),
     });
 
+    if (!openrouterRes.ok) {
+      return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
+    }
+
     const data = await openrouterRes.json();
-    const script = data?.choices?.[0]?.message?.content ?? null;
+    const script = data?.choices?.[0]?.message?.content;
 
     if (!script) {
       return NextResponse.json({ error: 'No response from AI' }, { status: 500 });
     }
 
     return NextResponse.json({ script: script.trim() });
-  } catch (err) {
-    console.error('Rewrite error:', err);
+  } catch (error) {
+    console.error('Rewrite error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

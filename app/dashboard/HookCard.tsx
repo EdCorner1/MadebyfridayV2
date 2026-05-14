@@ -152,7 +152,7 @@ function ListCard({ hook, index, isSaved, onSave, onReject, onPreviewClick }: Ho
         ) : (
           <>
             <button onClick={onSave} className="rounded-full bg-[#111] py-2 text-xs text-white hover:bg-[#333] transition">
-              I'll use this
+              I&apos;ll use this
             </button>
             <button onClick={onReject} className="rounded-full border border-black/10 py-2 text-xs text-[#555] hover:bg-[#f7f4ee] transition">
               Not for me

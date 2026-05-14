@@ -1,10 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useState } from 'react';
 import { Hook } from './types';
 import { useAuth } from '../components/AuthProvider';
 import AuthModal from '../components/AuthModal';
 import { supabase } from '../lib/supabase';
+import { getScriptsRemaining, getScriptLimit } from '../lib/quota';
+
+
+function getSavedPlatform(): string {
+  if (typeof window === 'undefined') return 'tiktok';
+
+  try {
+    const savedProfile = localStorage.getItem('friday_profile');
+    if (!savedProfile) return 'tiktok';
+    return JSON.parse(savedProfile).platform || 'tiktok';
+  } catch {
+    return 'tiktok';
+  }
+}
 
 interface RewritePanelProps {
   hook: Hook;
@@ -24,23 +39,8 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
-  // Check usage on mount
-  useEffect(() => {
-    if (!user) {
-      setAuthMode('signup');
-      return;
-    }
-    if (profile) {
-      const remaining = getRemaining(profile);
-      if (remaining <= 0) {
-        setShowUpgrade(true);
-      }
-    }
-  }, [user, profile]);
-
-  const platform = localStorage.getItem('friday_profile')
-    ? (JSON.parse(localStorage.getItem('friday_profile')!).platform || 'tiktok')
-    : 'tiktok';
+  const quotaBlocked = profile ? getScriptsRemaining(profile) === 0 : false;
+  const platform = getSavedPlatform();
 
   const extractTranscript = async () => {
     if (!videoUrl.trim() && !transcriptInput.trim()) return;
@@ -94,7 +94,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
   const handleRewrite = async () => {
     if (!userTopic.trim() && !transcriptInput.trim()) return;
     if (!user) { setAuthMode('signup'); return; }
-    if (showUpgrade) { return; }
+    if (showUpgrade || quotaBlocked) { return; }
 
     setLoading(true);
     setError(null);
@@ -184,7 +184,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
   }
 
   // ── Upgrade prompt ───────────────────────────────────────────────────
-  if (showUpgrade) {
+  if (showUpgrade || quotaBlocked) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
         <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
@@ -193,13 +193,13 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
           <p className="text-sm text-[#888] mb-6">
             You&apos;ve burned through your 5 free scripts this month. Upgrade to Pro for 15 scripts/month and full access to all 10,000 viral hooks.
           </p>
-          <a
+          <Link
             href="/#pricing"
             onClick={onClose}
             className="block w-full rounded-full bg-[#FF6B35] py-3 text-sm font-medium text-white hover:opacity-90"
           >
             Upgrade to Pro →
-          </a>
+          </Link>
           <button
             onClick={onClose}
             className="mt-4 text-sm text-[#aaa] hover:text-[#666]"
@@ -247,8 +247,8 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
             <div className="space-y-4">
               {/* Script quota indicator */}
               {profile && (() => {
-                const remaining = getRemaining(profile);
-                const total = getTotal(profile.plan);
+                const remaining = getScriptsRemaining(profile);
+                const total = getScriptLimit(profile.plan);
                 if (total === -1) return null;
                 return (
                   <div className="flex items-center gap-2">
@@ -372,17 +372,4 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
       </div>
     </div>
   );
-}
-
-// Helpers shared with dashboard
-export function getRemaining(profile: { plan: string; scripts_used: number }): number {
-  const limits: Record<string, number> = { free: 5, pro: 15, max: -1, lifetime: -1 };
-  const limit = limits[profile.plan] ?? 5;
-  if (limit === -1) return -1;
-  return Math.max(0, limit - (profile.scripts_used ?? 0));
-}
-
-export function getTotal(plan: string): number {
-  const limits: Record<string, number> = { free: 5, pro: 15, max: -1, lifetime: -1 };
-  return limits[plan] ?? 5;
 }

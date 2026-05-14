@@ -1,26 +1,24 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
+import { UserProfile } from '../dashboard/types';
 
-export default function Onboarding({ onComplete }: { onComplete: (profile: any) => void }) {
-  const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState({
+const PLATFORMS = ['tiktok', 'instagram', 'youtube-short', 'youtube-long'] as const;
+const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'pro'] as const;
+
+export default function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
+  const [profile, setProfile] = useState<UserProfile>({
     name: '',
     niche: '',
     platform: 'tiktok',
     experience: 'intermediate',
   });
 
-  const handleComplete = () => {
-    onComplete(profile);
-  };
-
   return (
     <div className="w-full max-w-md rounded-3xl border border-[#ece7df] bg-white p-8 shadow-xl">
       <div className="mb-8 flex items-center gap-3">
-        <div className="h-10 w-10 overflow-hidden rounded-xl bg-white shadow-sm">
-          <img src="/logo_app_icon.svg" alt="Friday" className="h-full w-full object-cover" />
-        </div>
+        <Image src="/logo_app_icon.svg" alt="" width={40} height={40} className="rounded-xl bg-white shadow-sm" />
         <div>
           <h2 className="text-xl font-semibold text-charcoal">Let&apos;s calibrate Friday 🖤</h2>
           <p className="text-sm text-[#5e5a54]">A few quick details to make your scripts hit harder.</p>
@@ -29,60 +27,64 @@ export default function Onboarding({ onComplete }: { onComplete: (profile: any) 
 
       <div className="space-y-5">
         <div>
-          <label className="mb-2 block text-sm font-medium text-charcoal">Your Name</label>
+          <label className="mb-2 block text-sm font-medium text-charcoal" htmlFor="profile-name">Your name</label>
           <input
+            id="profile-name"
             type="text"
             value={profile.name}
-            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+            onChange={(event) => setProfile({ ...profile, name: event.target.value })}
             placeholder="Ed"
             className="w-full rounded-xl border border-[#ece7df] bg-white px-4 py-3 text-charcoal placeholder-[#c8c4bc] outline-none focus:border-coral focus:ring-1 focus:ring-coral"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-charcoal">Your Primary Niche</label>
+          <label className="mb-2 block text-sm font-medium text-charcoal" htmlFor="profile-niche">Your primary niche</label>
           <input
+            id="profile-niche"
             type="text"
             value={profile.niche}
-            onChange={(e) => setProfile({ ...profile, niche: e.target.value })}
-            placeholder="e.g. Minimalist Home Decor"
+            onChange={(event) => setProfile({ ...profile, niche: event.target.value })}
+            placeholder="e.g. AI tools for freelancers"
             className="w-full rounded-xl border border-[#ece7df] bg-white px-4 py-3 text-charcoal placeholder-[#c8c4bc] outline-none focus:border-coral focus:ring-1 focus:ring-coral"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-charcoal">Primary Platform</label>
+          <p className="mb-2 block text-sm font-medium text-charcoal">Primary platform</p>
           <div className="grid grid-cols-2 gap-2">
-            {['tiktok', 'instagram', 'youtube-short', 'youtube-long'].map((p) => (
+            {PLATFORMS.map((platform) => (
               <button
-                key={p}
-                onClick={() => setProfile({ ...profile, platform: p })}
+                key={platform}
+                type="button"
+                onClick={() => setProfile({ ...profile, platform })}
                 className={`rounded-xl border py-3 text-sm font-medium capitalize transition ${
-                  profile.platform === p
+                  profile.platform === platform
                     ? 'border-coral bg-coral/5 text-coral'
                     : 'border-[#ece7df] bg-white text-[#555] hover:border-[#ccc]'
                 }`}
               >
-                {p.replace('-', ' ')}
+                {platform.replace('-', ' ')}
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-charcoal">Experience Level</label>
+          <p className="mb-2 block text-sm font-medium text-charcoal">Experience level</p>
           <div className="grid grid-cols-3 gap-2">
-            {['beginner', 'intermediate', 'pro'].map((lvl) => (
+            {EXPERIENCE_LEVELS.map((experience) => (
               <button
-                key={lvl}
-                onClick={() => setProfile({ ...profile, experience: lvl })}
+                key={experience}
+                type="button"
+                onClick={() => setProfile({ ...profile, experience })}
                 className={`rounded-xl border py-3 text-sm font-medium capitalize transition ${
-                  profile.experience === lvl
+                  profile.experience === experience
                     ? 'border-coral bg-coral/5 text-coral'
                     : 'border-[#ece7df] bg-white text-[#555] hover:border-[#ccc]'
                 }`}
               >
-                {lvl}
+                {experience}
               </button>
             ))}
           </div>
@@ -91,14 +93,16 @@ export default function Onboarding({ onComplete }: { onComplete: (profile: any) 
 
       <div className="mt-8 space-y-2">
         <button
-          onClick={handleComplete}
-          className="w-full rounded-full bg-coral py-3.5 text-base font-semibold text-white hover:bg-red-700 transition-colors"
+          type="button"
+          onClick={() => onComplete(profile)}
+          className="w-full rounded-full bg-coral py-3.5 text-base font-semibold text-white transition-colors hover:bg-red-700"
         >
           Start finding hooks →
         </button>
         <button
-          onClick={handleComplete}
-          className="w-full text-center text-sm text-[#aaa] hover:text-[#888] transition-colors"
+          type="button"
+          onClick={() => onComplete(profile)}
+          className="w-full text-center text-sm text-[#aaa] transition-colors hover:text-[#888]"
         >
           Skip for now
         </button>

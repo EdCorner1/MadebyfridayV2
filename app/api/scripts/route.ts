@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '../../lib/supabase';
-import { getProfile, checkAndResetScripts, getScriptsRemaining, useScript } from '../../lib/auth';
-import { SCRIPT_LIMITS } from '../../lib/types';
+import { getProfile, checkAndResetScripts, consumeScript } from '../../lib/auth';
+import { getScriptsRemaining, getScriptLimit } from '../../lib/quota';
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         allowed: false,
         scripts_used: checked.scripts_used,
-        scripts_limit: SCRIPT_LIMITS[checked.plan],
+        scripts_limit: getScriptLimit(checked.plan),
         remaining: 0,
         upgrade: true,
       });
     }
 
     // Decrement the counter
-    const result = await useScript(user.id);
+    const result = await consumeScript(user.id);
     if (!result.success) {
       return NextResponse.json({ allowed: false, error: result.error }, { status: 403 });
     }
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       allowed: true,
       scripts_used: checked.scripts_used + 1,
-      scripts_limit: SCRIPT_LIMITS[checked.plan],
+      scripts_limit: getScriptLimit(checked.plan),
       remaining: remaining - 1,
       upgrade: false,
     });
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       scripts_used: checked.scripts_used,
-      scripts_limit: SCRIPT_LIMITS[checked.plan],
+      scripts_limit: getScriptLimit(checked.plan),
       remaining,
       plan: checked.plan,
       is_paid: checked.plan !== 'free',

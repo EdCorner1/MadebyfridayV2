@@ -19,16 +19,22 @@ function stripVTT(html: string): string {
     .trim();
 }
 
+type CaptionTrack = {
+  baseUrl: string;
+  languageCode?: string;
+  vssId?: string;
+};
+
 async function getYouTubeTranscript(videoUrl: string): Promise<{ transcript: string; videoId: string } | null> {
   const id = ytdl.getVideoID(videoUrl);
   if (!id) return null;
 
   const info = await ytdl.getBasicInfo(videoUrl);
-  const trackList = info.player_response?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+  const trackList = info.player_response?.captions?.playerCaptionsTracklistRenderer?.captionTracks as CaptionTrack[] | undefined;
   if (!trackList || trackList.length === 0) return null;
 
   // Prefer English, fall back to first available
-  const en = trackList.find((t: any) => t.languageCode === 'en' || t.vssId?.startsWith('.en'));
+  const en = trackList.find((track) => track.languageCode === 'en' || track.vssId?.startsWith('.en'));
   const track = en || trackList[0];
 
   const res = await fetch(track.baseUrl, { signal: AbortSignal.timeout(8000) });

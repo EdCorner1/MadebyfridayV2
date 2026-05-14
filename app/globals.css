@@ -1,29 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Caveat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --color-coral: #DC2626;
   --color-cream: #FDFCF7;
   --color-charcoal: #111111;
+  --font-display: var(--font-bricolage), Georgia, serif;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 * {
+  box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  box-sizing: border-box;
-  max-width: 100vw;
-  overflow-x: hidden;
 }
 
 html {
-  max-width: 100vw;
-  overscroll-behavior: none;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  max-width: 100vw;
-  overscroll-behavior: none;
+  background: #FDFCF7;
+  color: #111111;
+  font-family: var(--font-sans);
+}
+
+button,
+a,
+textarea,
+input {
+  font: inherit;
 }
 
 ::-webkit-scrollbar {
@@ -35,56 +41,6 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-
-/* PERFECTED TRACING BORDER */
-.glowing-input-container {
-  position: relative;
-  background: white;
-  border-radius: 1rem;
-  padding: 2px; 
-  overflow: hidden;
-  z-index: 1;
-}
-
-/* We use a massive rotating gradient block and a masked inner box */
-.glowing-input-container::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(
-    transparent, 
-    #DC2626, 
-    transparent 30%
-  );
-  animation: rotate-glow 3s linear infinite;
-  z-index: -2;
-}
-
-.glowing-input-container::after {
-  content: "";
-  position: absolute;
-  inset: 2px; 
-  background: white;
-  border-radius: 0.9rem;
-  z-index: -1;
-}
-
-@keyframes rotate-glow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.cursor-blink {
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  from, to { color: transparent }
-  50% { color: #DC2626; }
+  background: rgba(17, 17, 17, 0.18);
+  border-radius: 999px;
 }

@@ -1,57 +1,55 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import HookCard from './HookCard';
 import PlannerSidebar from './PlannerSidebar';
 import RewritePanel from './RewritePanel';
 import { Hook } from './types';
 
+function readStoredSet(key: string): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    localStorage.removeItem(key);
+    return new Set();
+  }
+}
+
 export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
   const [hooks] = useState<Hook[]>(initialHooks);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-  const [rejectedIds, setRejectedIds] = useState<Set<string>>(new Set());
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => readStoredSet('mbf_saved'));
+  const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => readStoredSet('mbf_rejected'));
   const [rewriteHook, setRewriteHook] = useState<Hook | null>(null);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-  const [lightboxHtml, setLightboxHtml] = useState<string | null>(null);
+  const [lightboxPostId, setLightboxPostId] = useState<string | null>(null);
   const [lightboxLoading, setLightboxLoading] = useState(false);
 
-  useEffect(() => {
-    try {
-      const savedRaw = localStorage.getItem('mbf_saved');
-      const rejectedRaw = localStorage.getItem('mbf_rejected');
-      if (savedRaw) setSavedIds(new Set(JSON.parse(savedRaw)));
-      if (rejectedRaw) setRejectedIds(new Set(JSON.parse(rejectedRaw)));
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    if (lightboxUrl) {
-      setLightboxLoading(true);
-      const encoded = encodeURIComponent(lightboxUrl);
-      fetch(`/api/preview?url=${encoded}`)
-        .then(r => r.json())
-        .then(data => {
-          setLightboxHtml(data.html || null);
-          setLightboxLoading(false);
-        })
-        .catch(() => {
-          setLightboxLoading(false);
-        });
-    }
-  }, [lightboxUrl]);
-
-  const openLightbox = (url: string) => {
+  const openLightbox = async (url: string) => {
     setLightboxUrl(url);
-    setLightboxHtml(null);
+    setLightboxPostId(null);
+    setLightboxLoading(true);
+
+    try {
+      const response = await fetch(`/api/preview?url=${encodeURIComponent(url)}`);
+      const data = await response.json();
+      setLightboxPostId(data.postId || null);
+    } catch {
+      setLightboxPostId(null);
+    } finally {
+      setLightboxLoading(false);
+    }
   };
 
   const closeLightbox = () => {
     setLightboxUrl(null);
-    setLightboxHtml(null);
+    setLightboxPostId(null);
   };
 
-  const handleSave = (id: string, hook: Hook) => {
+  const handleSave = (id: string) => {
     const newSaved = new Set(savedIds);
     newSaved.add(id);
     setSavedIds(newSaved);
@@ -114,16 +112,16 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
       </div>
 
       {view === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3">
           {remainingHooks.map((hook, i) => (
             <HookCard
-              key={i}
+              key={hook.url || `${hook.name}-${i}`}
               hook={hook}
               index={i}
               isSaved={savedIds.has(hook.url)}
-              onSave={() => handleSave(hook.url, hook)}
+              onSave={() => handleSave(hook.url)}
               onReject={() => handleReject(hook.url)}
-              variant="list"
+              variant="grid"
               onPreviewClick={() => openLightbox(hook.url)}
             />
           ))}
@@ -132,11 +130,11 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
         <div className="space-y-4">
           {remainingHooks.map((hook, i) => (
             <HookCard
-              key={i}
+              key={hook.url || `${hook.name}-${i}`}
               hook={hook}
               index={i}
               isSaved={savedIds.has(hook.url)}
-              onSave={() => handleSave(hook.url, hook)}
+              onSave={() => handleSave(hook.url)}
               onReject={() => handleReject(hook.url)}
               variant="list"
               onPreviewClick={() => openLightbox(hook.url)}
@@ -180,11 +178,16 @@ export default function HookGrid({ initialHooks }: { initialHooks: Hook[] }) {
               <div className="flex items-center justify-center rounded-[16px] bg-[#222] aspect-[4/5]">
                 <p className="text-white/50 text-sm">Loading video...</p>
               </div>
-            ) : lightboxHtml ? (
-              <div
-                className="rounded-[16px] overflow-hidden bg-[#111]"
-                dangerouslySetInnerHTML={{ __html: lightboxHtml }}
-              />
+            ) : lightboxPostId ? (
+              <div className="relative overflow-hidden rounded-[16px] bg-[#111]" style={{ paddingTop: '125%' }}>
+                <iframe
+                  src={`https://www.instagram.com/p/${lightboxPostId}/embed/`}
+                  className="absolute inset-0 h-full w-full border-0"
+                  scrolling="no"
+                  allow="encrypted-media"
+                  title="Instagram video"
+                />
+              </div>
             ) : (
               <a
                 href={lightboxUrl}

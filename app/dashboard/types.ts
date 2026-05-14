@@ -15,9 +15,3 @@ export interface Hook {
   saved?: boolean;
 }
 
-export interface RewrittenScript {
-  id: string;
-  originalHookId: string;
-  content: string;
-  createdAt: Date;
-}

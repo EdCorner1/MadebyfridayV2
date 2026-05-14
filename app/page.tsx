@@ -1,66 +1,54 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import './globals.css';
 import HeroForm from './components/HeroForm';
-import FloatingIcons from './components/FloatingIcons';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-cream flex flex-col relative">
-      <FloatingIcons />
-      {/* Simple nav */}
-      <nav className="w-full px-6 py-5 flex items-center justify-between max-w-3xl mx-auto relative z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm bg-white">
-            <img src="/logo_app_icon.svg" alt="Friday" className="w-full h-full object-cover" />
-          </div>
-          <span style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif" }} className="font-medium text-charcoal text-lg tracking-tight">Friday</span>
-        </div>
-        <a href="/dashboard" style={{ fontFamily: "'Inter', sans-serif" }} className="text-sm text-charcoal hover:text-red-600 transition-colors font-medium">
-          Go to app →
-        </a>
-      </nav>
+    <main className="min-h-screen bg-cream text-charcoal">
+      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6">
+        <nav className="flex items-center justify-between py-6">
+          <Link href="/" className="flex items-center gap-3" aria-label="Made by Friday home">
+            <Image
+              src="/logo_app_icon.svg"
+              alt=""
+              width={36}
+              height={36}
+              className="rounded-xl shadow-sm"
+              priority
+            />
+            <span className="font-display text-lg font-medium tracking-tight">Friday</span>
+          </Link>
 
-      {/* Hero — centered, Lovable-style */}
-      <section className="flex-1 flex flex-col items-center justify-center px-6 pt-10 pb-24 relative z-10">
-        <div className="w-full max-w-2xl text-center space-y-8">
-          {/* Trust Badge */}
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                  <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" />
-                </div>
-              ))}
-            </div>
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-charcoal/40 bg-white/50 backdrop-blur-sm px-2 py-0.5 rounded-full border border-charcoal/5">
-              Live data from 10,000 viral videos
-            </span>
-          </div>
+          <Link href="/dashboard" className="text-sm font-medium text-charcoal/60 transition hover:text-coral">
+            Go to app →
+          </Link>
+        </nav>
 
-          {/* Headline */}
-          <h1 style={{ fontFamily: "'Bricolage Grotesque', Georgia, serif", fontWeight: 400 }} className="text-4xl sm:text-5xl md:text-7xl text-charcoal leading-tight">
-            Find your next<br />
-            <span style={{ color: '#DC2626', fontFamily: "'Caveat', cursive", fontWeight: 600 }}>viral hook.</span>
+        <section className="flex flex-1 flex-col items-center justify-center pb-20 pt-10 text-center">
+          <p className="mb-5 rounded-full border border-charcoal/10 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-charcoal/45">
+            Viral hooks from real creator data
+          </p>
+
+          <h1 className="font-display text-5xl font-medium leading-[0.98] tracking-[-0.04em] text-charcoal sm:text-6xl md:text-7xl">
+            Find your next
+            <br />
+            <span className="text-coral">viral hook.</span>
           </h1>
 
-          {/* Subheadline */}
-          <p style={{ fontFamily: "'Inter', sans-serif" }} className="text-charcoal/55 text-lg md:text-xl leading-relaxed max-w-lg mx-auto">
-            Describe the content you make, Friday pulls data from 10,000 viral videos with live links and rewrites it in your style
+          <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-charcoal/55 sm:text-lg">
+            Tell Friday what you make. Get relevant viral references and rewrite them for your audience.
           </p>
 
-          {/* The input — the whole product */}
-          <HeroForm />
+          <div className="mt-8 w-full max-w-2xl">
+            <HeroForm />
+          </div>
 
-          {/* Tiny trust line */}
-          <p style={{ fontFamily: "'Inter', sans-serif" }} className="text-charcoal/30 text-xs tracking-wide">
-            No signup needed · 1,000+ viral hooks · New ideas daily
+          <p className="mt-4 text-xs text-charcoal/35">
+            No signup needed to start · Built for short-form creators
           </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer style={{ fontFamily: "'Inter', sans-serif" }} className="px-6 py-4 text-center text-charcoal/20 text-xs relative z-10">
-        © 2026 Made by Friday
-      </footer>
+        </section>
+      </div>
     </main>
   );
 }

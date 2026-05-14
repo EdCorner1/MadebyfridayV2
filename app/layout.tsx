@@ -1,6 +1,19 @@
 import type { Metadata } from 'next';
+import { Bricolage_Grotesque, Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './components/AuthProvider';
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-bricolage',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Made by Friday — Viral Script Generator for UGC Creators',
@@ -16,15 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${bricolage.variable} ${inter.variable}`}>
       <body className="antialiased">
         <AuthProvider>
           {children}
