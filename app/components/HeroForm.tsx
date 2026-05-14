@@ -1,13 +1,66 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const EXAMPLE_PROMPT = 'I make AI tool videos for freelancers who want to save time';
+const EXAMPLE_PROMPTS = [
+  'I make AI tool videos for freelancers...',
+  'I make UGC content for skincare brands...',
+  'I teach creators how to get more clients...',
+  'I review productivity apps for solopreneurs...',
+  'I make fitness content for busy dads...',
+];
+
+function useTypewriterPlaceholder(active: boolean) {
+  const [placeholder, setPlaceholder] = useState('');
+
+  useEffect(() => {
+    if (!active) return;
+
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      const phrase = EXAMPLE_PROMPTS[phraseIndex];
+      setPlaceholder(phrase.slice(0, charIndex));
+
+      if (!deleting && charIndex < phrase.length) {
+        charIndex += 1;
+        timer = setTimeout(tick, 55);
+        return;
+      }
+
+      if (!deleting && charIndex === phrase.length) {
+        deleting = true;
+        timer = setTimeout(tick, 1500);
+        return;
+      }
+
+      if (deleting && charIndex > 0) {
+        charIndex -= 1;
+        timer = setTimeout(tick, 28);
+        return;
+      }
+
+      deleting = false;
+      phraseIndex = (phraseIndex + 1) % EXAMPLE_PROMPTS.length;
+      timer = setTimeout(tick, 450);
+    };
+
+    timer = setTimeout(tick, 250);
+    return () => clearTimeout(timer);
+  }, [active]);
+
+  return placeholder;
+}
 
 export default function HeroForm() {
   const router = useRouter();
   const [text, setText] = useState('');
+  const [focused, setFocused] = useState(false);
+  const placeholder = useTypewriterPlaceholder(!text && !focused);
 
   const submit = () => {
     const query = text.trim();
@@ -21,36 +74,40 @@ export default function HeroForm() {
         event.preventDefault();
         submit();
       }}
-      className="rounded-[24px] border border-charcoal/10 bg-white p-3 text-left shadow-[0_24px_80px_rgba(17,17,17,0.08)]"
+      className="hero-input-shell text-left shadow-[0_24px_80px_rgba(17,17,17,0.08)]"
     >
-      <label htmlFor="hero-prompt" className="sr-only">
-        Describe the content you make
-      </label>
+      <div className="hero-input-panel">
+        <label htmlFor="hero-prompt" className="sr-only">
+          Describe the content you make
+        </label>
 
-      <textarea
-        id="hero-prompt"
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            submit();
-          }
-        }}
-        placeholder={EXAMPLE_PROMPT}
-        rows={4}
-        className="min-h-32 w-full resize-none rounded-[18px] bg-[#FAFAF8] px-5 py-4 text-base leading-7 text-charcoal outline-none placeholder:text-charcoal/30 focus:ring-2 focus:ring-coral/20"
-      />
+        <textarea
+          id="hero-prompt"
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              submit();
+            }
+          }}
+          placeholder={placeholder}
+          rows={4}
+          className="min-h-32 w-full resize-none rounded-[18px] bg-[#FAFAF8] px-5 py-4 text-base leading-7 text-charcoal outline-none placeholder:text-charcoal/30 focus:ring-2 focus:ring-coral/15"
+        />
 
-      <div className="mt-3 flex items-center justify-between gap-3 px-1">
-        <p className="hidden text-xs text-charcoal/35 sm:block">Press Enter to generate ideas</p>
-        <button
-          type="submit"
-          disabled={!text.trim()}
-          className="ml-auto rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white transition hover:bg-charcoal/85 disabled:cursor-not-allowed disabled:opacity-35"
-        >
-          Find hooks →
-        </button>
+        <div className="mt-3 flex items-center justify-between gap-3 px-1">
+          <p className="hidden text-xs text-charcoal/35 sm:block">Press Enter to generate ideas</p>
+          <button
+            type="submit"
+            disabled={!text.trim()}
+            className="ml-auto rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white transition hover:bg-charcoal/85 disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            Find hooks →
+          </button>
+        </div>
       </div>
     </form>
   );

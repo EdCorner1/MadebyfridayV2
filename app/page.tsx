@@ -2,11 +2,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import './globals.css';
 import HeroForm from './components/HeroForm';
+import FloatingSocialIcons from './components/FloatingSocialIcons';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-cream text-charcoal">
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6">
+    <main className="relative min-h-screen overflow-hidden bg-cream text-charcoal">
+      <FloatingSocialIcons />
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6">
         <nav className="flex items-center justify-between py-6">
           <Link href="/" className="flex items-center gap-3" aria-label="Made by Friday home">
             <Image
