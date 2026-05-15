@@ -35,7 +35,7 @@ function PreviewTile({ hook, index }: { hook: Hook; index: number }) {
   const embedUrl = getInstagramEmbedUrl(hook.url);
 
   return (
-    <div className="group relative aspect-[9/16] w-full overflow-hidden rounded-[16px] bg-[#111] text-left shadow-sm">
+    <div className="group relative aspect-[9/16] w-full overflow-hidden rounded-[11px] bg-[#111] text-left shadow-sm">
       {embedUrl ? (
         <iframe
           src={embedUrl}
@@ -71,7 +71,7 @@ function PreviewTile({ hook, index }: { hook: Hook; index: number }) {
 
 export default function HookCard({ hook, index, isSaved, onSave, onReject, onRewrite }: HookCardProps) {
   return (
-    <article className="flex flex-col rounded-[18px] border border-[#ece7df] bg-white p-3 shadow-sm transition-shadow hover:shadow-md">
+    <article className="flex flex-col rounded-[15px] border border-[#ece7df] bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
       <PreviewTile hook={hook} index={index} />
 
       <div className="flex flex-1 flex-col pt-3.5">
