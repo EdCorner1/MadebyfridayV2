@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Hook, CreatorProfile, SavedRewrite } from './types';
 
 type DashboardSidebarProps = {
@@ -134,9 +135,16 @@ export default function DashboardSidebar({
 
         <div className="rounded-[18px] border border-[#ece7df] bg-[#fafaf8] p-3">
           {isSignedIn ? (
-            <button type="button" onClick={onSignOut} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777] hover:text-[#333]">
-              Sign out
-            </button>
+            <div className="space-y-2">
+              {planLabel !== 'Founding Pro' && (
+                <Link href="/upgrade" className="block w-full rounded-full bg-[#DC2626] px-3 py-2 text-center text-xs font-medium text-white">
+                  Upgrade to Founding Pro
+                </Link>
+              )}
+              <button type="button" onClick={onSignOut} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777] hover:text-[#333]">
+                Sign out
+              </button>
+            </div>
           ) : (
             <div className="space-y-2">
               <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#DC2626] px-3 py-2 text-xs font-medium text-white">

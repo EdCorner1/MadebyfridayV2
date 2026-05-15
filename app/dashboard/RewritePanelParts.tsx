@@ -75,11 +75,13 @@ export function UpgradePrompt({ onClose }: { onClose: () => void }) {
 export function RewriteShell({
   hookType,
   hookName,
+  sourceUrl,
   onClose,
   children,
 }: {
   hookType: string;
   hookName: string;
+  sourceUrl?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -106,6 +108,11 @@ export function RewriteShell({
         <div className="px-6 py-4 bg-[#fafaf8] border-b border-[#ece7df]">
           <p className="text-xs text-[#aaa] mb-1">Reference hook</p>
           <p className="text-[15px] font-medium text-[#111] leading-snug">{hookName}</p>
+          {sourceUrl && (
+            <a href={sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex text-xs font-medium text-[#DC2626] hover:underline">
+              Original source →
+            </a>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>

@@ -17,26 +17,53 @@ function getHost(url: string): string {
   }
 }
 
+function getInstagramEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes('instagram.com')) return null;
+
+    const match = parsed.pathname.match(/^\/(p|reel|tv)\/([^/]+)/);
+    if (!match) return null;
+
+    return `https://www.instagram.com/${match[1]}/${match[2]}/embed`;
+  } catch {
+    return null;
+  }
+}
+
 function PreviewTile({ hook, index }: { hook: Hook; index: number }) {
+  const embedUrl = getInstagramEmbedUrl(hook.url);
+
   return (
     <div className="group relative aspect-[9/16] w-full overflow-hidden rounded-[16px] bg-[#111] text-left shadow-sm">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(220,38,38,0.72),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
-      <div className="absolute inset-0 bg-black/10" />
+      {embedUrl ? (
+        <iframe
+          src={embedUrl}
+          title={`Reference video ${index + 1}`}
+          loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          className="absolute inset-0 h-full w-full border-0 bg-white"
+        />
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(220,38,38,0.72),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
+          <div className="absolute inset-0 bg-black/10" />
+          <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#111] shadow-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+            <p className="line-clamp-2 text-xs font-medium leading-snug text-white/90">Reference pattern</p>
+          </div>
+        </>
+      )}
 
-      <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#111]">
+      <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#111] shadow-sm">
         {getHost(hook.url)}
       </div>
-      <div className="absolute right-3 top-3 rounded-full bg-black/45 px-2 py-1 text-[9px] font-semibold text-white">
+      <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/45 px-2 py-1 text-[9px] font-semibold text-white shadow-sm">
         #{index + 1}
-      </div>
-
-      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#111] shadow-sm">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        </div>
-        <p className="line-clamp-2 text-xs font-medium leading-snug text-white/90">Reference pattern</p>
       </div>
     </div>
   );

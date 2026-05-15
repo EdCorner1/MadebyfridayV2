@@ -12,7 +12,6 @@ import {
   RewriteResult,
   RewriteShell,
   TopicInput,
-  TranscriptInput,
   UpgradePrompt,
 } from './RewritePanelParts';
 import { loadWorkspace } from './localWorkspace';
@@ -40,64 +39,15 @@ function makeRewriteId() {
 export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePanelProps) {
   const { user, profile, refreshProfile } = useAuth();
   const [userTopic, setUserTopic] = useState('');
-  const [videoUrl, setVideoUrl] = useState('');
-  const [transcriptInput, setTranscriptInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [extracting, setExtracting] = useState(false);
-  const [transcriptStatus, setTranscriptStatus] = useState('');
   const [result, setResult] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
-  const hasTranscript = transcriptInput.trim().length > 0;
-  const canRewrite = Boolean(userTopic.trim() || hasTranscript);
+  const canRewrite = Boolean(userTopic.trim());
   const quotaBlocked = profile ? getScriptsRemaining(profile) === 0 : false;
-
-  const extractTranscript = async () => {
-    if (!videoUrl.trim() && !transcriptInput.trim()) return;
-
-    setExtracting(true);
-    setTranscriptStatus('');
-
-    try {
-      let transcript = '';
-      let source = '';
-
-      if (videoUrl.trim()) {
-        const response = await fetch(`/api/extract-transcript?url=${encodeURIComponent(videoUrl.trim())}`);
-        const data = await response.json();
-        if (data.transcript) {
-          transcript = data.transcript;
-          source = data.source;
-        } else {
-          setTranscriptStatus(data.error || 'Could not extract. Try pasting transcript below.');
-        }
-      }
-
-      if (!transcript && transcriptInput.trim()) {
-        const response = await fetch('/api/extract-transcript', {
-          method: 'POST',
-          body: transcriptInput.trim(),
-        });
-        const data = await response.json();
-        if (data.transcript) {
-          transcript = data.transcript;
-          source = 'pasted';
-        }
-      }
-
-      if (transcript) {
-        setTranscriptInput(transcript);
-        setTranscriptStatus(`✓ Transcript loaded (${source}) — ${transcript.length} chars`);
-      }
-    } catch {
-      setTranscriptStatus('Extraction failed. Try pasting your transcript below.');
-    } finally {
-      setExtracting(false);
-    }
-  };
 
   const handleRewrite = async () => {
     if (!canRewrite) return;
@@ -125,7 +75,7 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           referenceType: hook.type,
           userTopic: userTopic.trim(),
           platform,
-          transcript: transcriptInput.trim() || undefined,
+          sourceUrl: hook.url,
           rewriteStrategy: hook.rewrite_strategy,
         }),
       });
@@ -139,7 +89,6 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           hook,
           topic: userTopic.trim(),
           platform,
-          transcript: transcriptInput.trim() || undefined,
           script,
           remaining: data.remaining,
           createdAt: new Date().toISOString(),
@@ -172,7 +121,7 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
   }
 
   return (
-    <RewriteShell hookType={hook.type} hookName={hook.name} onClose={onClose}>
+    <RewriteShell hookType={hook.type} hookName={hook.name} sourceUrl={hook.url} onClose={onClose}>
       {result ? (
         <RewriteResult
           result={result}
@@ -187,23 +136,17 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
         <div className="space-y-4">
           {profile && <QuotaBar profile={profile} />}
 
-          <TranscriptInput
-            videoUrl={videoUrl}
-            transcriptInput={transcriptInput}
-            transcriptStatus={transcriptStatus}
-            extracting={extracting}
-            onVideoUrlChange={setVideoUrl}
-            onTranscriptChange={setTranscriptInput}
-            onExtract={extractTranscript}
-          />
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#ece7df]" />
-            <span className="text-[10px] uppercase tracking-widest text-[#ccc]">or</span>
-            <div className="flex-1 h-px bg-[#ece7df]" />
+          <div className="rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Reference source</p>
+            <p className="mt-2 text-sm leading-6 text-[#666]">
+              Friday already has the original source URL. Just tell her what you want to make and she&apos;ll adapt the pattern for your angle.
+            </p>
+            <a href={hook.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex text-xs font-medium text-[#DC2626] hover:underline">
+              View original reference →
+            </a>
           </div>
 
-          <TopicInput value={userTopic} hasTranscript={hasTranscript} onChange={setUserTopic} />
+          <TopicInput value={userTopic} hasTranscript={false} onChange={setUserTopic} />
 
           {error && <p className="text-sm text-red-500 bg-red-50 rounded-[10px] p-3">{error}</p>}
 
@@ -213,11 +156,11 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
             disabled={!canRewrite || loading}
             className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-40"
           >
-            {loading ? 'Friday is rewriting...' : hasTranscript ? 'Rewrite using viral transcript →' : 'Rewrite my script →'}
+            {loading ? 'Friday is rewriting...' : 'Rewrite this for my angle →'}
           </button>
 
           <p className="text-xs text-center text-[#ccc]">
-            Friday analyses the reference hook structure and rewrites it for your specific topic and audience.
+            Friday uses the reference hook structure and source context. No paste-the-URL busywork. We are not running a clerical circus.
           </p>
         </div>
       )}

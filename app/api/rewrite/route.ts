@@ -9,6 +9,7 @@ type RewriteRequest = {
   userTopic?: string;
   platform?: string;
   transcript?: string;
+  sourceUrl?: string;
   rewriteStrategy?: string;
 };
 
@@ -74,7 +75,7 @@ async function incrementUsage(userId: string, profile: Profile) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { referenceHook, referenceType, userTopic, platform, transcript, rewriteStrategy } = await req.json() as RewriteRequest;
+    const { referenceHook, referenceType, userTopic, platform, transcript, sourceUrl, rewriteStrategy } = await req.json() as RewriteRequest;
 
     if (!referenceHook || (!userTopic && !transcript)) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -111,7 +112,7 @@ Rewrite creator content using the reference hook's emotional structure.
 Hook type: ${referenceType ?? 'Unknown'}
 Platform: ${platform ?? 'short-form'}
 Topic/angle: ${userTopic ?? 'Use transcript context'}
-${rewriteStrategy ? `Rewrite strategy: ${rewriteStrategy}\n` : ''}${transcript ? `\nTranscript to learn from:\n${transcript.slice(0, 3500)}` : ''}
+${sourceUrl ? `Original source URL: ${sourceUrl}\n` : ''}${rewriteStrategy ? `Rewrite strategy: ${rewriteStrategy}\n` : ''}${transcript ? `\nTranscript to learn from:\n${transcript.slice(0, 3500)}` : ''}
 
 Output only the rewritten script.`;
 

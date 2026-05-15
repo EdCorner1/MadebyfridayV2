@@ -179,12 +179,19 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
                 </p>
               </div>
 
-              {displayTopic && (
-                <div className="rounded-full border border-[#ece7df] bg-[#fafaf8] px-4 py-2 text-sm text-[#555]">
-                  <span className="mr-1.5 text-xs text-[#aaa]">topic:</span>
-                  <span className="font-medium text-[#111]">&ldquo;{displayTopic}&rdquo;</span>
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {displayTopic && (
+                  <div className="rounded-full border border-[#ece7df] bg-[#fafaf8] px-4 py-2 text-sm text-[#555]">
+                    <span className="mr-1.5 text-xs text-[#aaa]">topic:</span>
+                    <span className="font-medium text-[#111]">&ldquo;{displayTopic}&rdquo;</span>
+                  </div>
+                )}
+                {user && profile?.plan !== 'lifetime' && (
+                  <Link href="/upgrade" className="rounded-full bg-[#DC2626] px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+                    Upgrade to Founding Pro →
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
 
