@@ -21,11 +21,54 @@ async function updateUserPlan(userId: string, plan: Plan, stripeCustomerId?: str
     .eq('id', userId);
 }
 
+async function markEventProcessed(event: Stripe.Event): Promise<boolean> {
+  const supabase = createServerClient();
+  const { error } = await supabase
+    .from('stripe_events')
+    .insert({ id: event.id, type: event.type });
+
+  if (!error) return true;
+  if (error.code === '23505') return false;
+  throw error;
+}
+
+async function claimFoundingSeat(): Promise<boolean> {
+  const supabase = createServerClient();
+  const { data, error } = await supabase.rpc('claim_founding_seat');
+  if (error) throw error;
+  return Array.isArray(data) && data.length > 0;
+}
+
+async function recordPurchase(session: Stripe.Checkout.Session, userId: string, plan: Plan) {
+  const supabase = createServerClient();
+  await supabase
+    .from('purchases')
+    .upsert({
+      user_id: userId,
+      stripe_checkout_session_id: session.id,
+      stripe_customer_id: typeof session.customer === 'string' ? session.customer : null,
+      stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+      plan,
+      amount_total: session.amount_total,
+      currency: session.currency,
+      status: session.payment_status ?? session.status,
+    }, { onConflict: 'stripe_checkout_session_id' });
+}
+
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.user_id;
   const plan = session.metadata?.plan;
 
   if (!userId || !isPlan(plan)) return;
+
+  if (plan === 'lifetime') {
+    const claimed = await claimFoundingSeat();
+    if (!claimed) {
+      console.error('[stripe-webhook] Founding deal oversold. Manual refund/review needed.', { sessionId: session.id, userId });
+      await recordPurchase(session, userId, plan);
+      return;
+    }
+  }
 
   await updateUserPlan(
     userId,
@@ -33,6 +76,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     typeof session.customer === 'string' ? session.customer : null,
     typeof session.subscription === 'string' ? session.subscription : null,
   );
+  await recordPurchase(session, userId, plan);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -63,6 +107,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const firstProcessingAttempt = await markEventProcessed(event);
+    if (!firstProcessingAttempt) return NextResponse.json({ received: true, duplicate: true });
+
     if (event.type === 'checkout.session.completed') {
       await handleCheckoutComplete(event.data.object as Stripe.Checkout.Session);
     }

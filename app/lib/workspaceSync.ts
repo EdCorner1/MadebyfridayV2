@@ -5,13 +5,18 @@ export function mergeWorkspaces(local: LocalWorkspace, remote: LocalWorkspace | 
   if (!remote) return local;
 
   const hooksByUrl = new Map<string, LocalWorkspace['savedHooks'][number]>();
-  for (const hook of remote.savedHooks) hooksByUrl.set(hook.url, hook);
-  for (const hook of local.savedHooks) hooksByUrl.set(hook.url, hook);
+  for (const hook of remote.savedHooks ?? []) hooksByUrl.set(hook.url, hook);
+  for (const hook of local.savedHooks ?? []) hooksByUrl.set(hook.url, hook);
+
+  const rewritesById = new Map<string, LocalWorkspace['savedRewrites'][number]>();
+  for (const rewrite of remote.savedRewrites ?? []) rewritesById.set(rewrite.id, rewrite);
+  for (const rewrite of local.savedRewrites ?? []) rewritesById.set(rewrite.id, rewrite);
 
   return {
     profile: local.profile ?? remote.profile,
     savedHooks: [...hooksByUrl.values()],
-    rejectedHookUrls: [...new Set([...remote.rejectedHookUrls, ...local.rejectedHookUrls])],
+    rejectedHookUrls: [...new Set([...(remote.rejectedHookUrls ?? []), ...(local.rejectedHookUrls ?? [])])],
+    savedRewrites: [...rewritesById.values()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
   };
 }
 

@@ -32,7 +32,8 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name')
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -61,40 +62,82 @@ CREATE TABLE IF NOT EXISTS founding_members (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Seed the counter row if it doesn't exist
 INSERT INTO founding_members (id, count, max) VALUES ('1', 0, 100)
 ON CONFLICT (id) DO NOTHING;
 
--- ── Atomic founding member increment (max 100) ─────────────
+-- Atomic founding member increment.
+-- Returns the updated row only when a seat was actually claimed.
+CREATE OR REPLACE FUNCTION claim_founding_seat()
+RETURNS TABLE(count INTEGER, max INTEGER) AS $$
+BEGIN
+  RETURN QUERY
+  UPDATE founding_members fm
+  SET count = fm.count + 1,
+      updated_at = NOW()
+  WHERE fm.id = '1'
+    AND fm.count < fm.max
+  RETURNING fm.count, fm.max;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Backwards-compatible wrapper for older app code/manual checks.
 CREATE OR REPLACE FUNCTION increment_founding()
 RETURNS INTEGER AS $$
 DECLARE
   new_count INTEGER;
 BEGIN
-  UPDATE founding_members
-  SET count = LEAST(count + 1, max), updated_at = NOW()
-  WHERE id = '1'
-  RETURNING count INTO new_count;
+  SELECT c.count INTO new_count FROM claim_founding_seat() AS c;
   RETURN new_count;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Stripe webhook event idempotency.
+CREATE TABLE IF NOT EXISTS stripe_events (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Optional purchase ledger for support/refunds/debugging.
+CREATE TABLE IF NOT EXISTS purchases (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  stripe_checkout_session_id TEXT UNIQUE,
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
+  plan TEXT NOT NULL,
+  amount_total INTEGER,
+  currency TEXT,
+  status TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_purchases_user ON purchases(user_id);
 
 -- ── Row Level Security ─────────────────────────────────────
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_hooks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE founding_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stripe_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
 
--- Profiles: users can only read/write their own row
+DROP POLICY IF EXISTS "Users own profile" ON profiles;
 CREATE POLICY "Users own profile" ON profiles
   FOR ALL USING (auth.uid() = id);
 
--- Saved hooks: users can only access their own hooks
+DROP POLICY IF EXISTS "Users own saved hooks" ON saved_hooks;
 CREATE POLICY "Users own saved hooks" ON saved_hooks
   FOR ALL USING (auth.uid() = user_id);
 
--- Founding members: anyone can read the count, only service role can write
+DROP POLICY IF EXISTS "Anyone can read founding count" ON founding_members;
 CREATE POLICY "Anyone can read founding count" ON founding_members
   FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can read own purchases" ON purchases;
+CREATE POLICY "Users can read own purchases" ON purchases
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- stripe_events and purchase writes are service-role only by omission.
 
 -- ============================================================
 -- ✅ Done. Add required runtime secrets via Vercel/Supabase dashboards.

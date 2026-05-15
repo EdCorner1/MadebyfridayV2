@@ -15,3 +15,14 @@ export interface Hook {
   saved?: boolean;
   rewrite_strategy?: string;
 }
+
+export interface SavedRewrite {
+  id: string;
+  hook: Hook;
+  topic: string;
+  platform: string;
+  transcript?: string;
+  script: string;
+  remaining?: number;
+  createdAt: string;
+}

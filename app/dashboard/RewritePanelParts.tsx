@@ -4,21 +4,33 @@ import { getScriptLimit, getScriptsRemaining } from '../lib/quota';
 
 export function AuthRequiredPrompt({
   setAuthMode,
+  onClose,
 }: {
   setAuthMode: (mode: 'signin' | 'signup') => void;
+  onClose: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
+      <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center relative">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-5 top-5 rounded-full p-2 text-[#aaa] transition hover:bg-[#f7f4ee] hover:text-[#333]"
+          aria-label="Close"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
         <div className="text-4xl mb-4">🖤</div>
-        <h3 className="text-xl font-semibold text-[#111] mb-2">Sign in to rewrite scripts</h3>
-        <p className="text-sm text-[#888] mb-6">Create your free account to save your workspace and get 10 free rewrites/month. No credit card needed.</p>
+        <h3 className="text-xl font-semibold text-[#111] mb-2">Create a free account to rewrite</h3>
+        <p className="text-sm text-[#888] mb-6">You can search and save hooks first. Sign up when you&apos;re ready for Friday to rewrite them and sync your workspace.</p>
         <button
           type="button"
           onClick={() => setAuthMode('signup')}
           className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90"
         >
-          Get started free →
+          Get 10 free rewrites →
         </button>
         <button
           type="button"
@@ -37,9 +49,9 @@ export function UpgradePrompt({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
         <div className="text-4xl mb-4">🔥</div>
-        <h3 className="text-xl font-semibold text-[#111] mb-2">You&apos;ve used your free scripts</h3>
+        <h3 className="text-xl font-semibold text-[#111] mb-2">You&apos;ve used your free rewrites</h3>
         <p className="text-sm text-[#888] mb-6">
-          You&apos;ve burned through your free scripts this month. Upgrade for more rewrites and full access to the viral hook engine.
+          You&apos;ve burned through your 10 free rewrites this month. Upgrade for unlimited rewrites and full access to the viral hook engine.
         </p>
         <Link
           href="/upgrade"
@@ -116,7 +128,7 @@ export function QuotaBar({ profile }: { profile: Profile }) {
         />
       </div>
       <span className="text-xs text-[#aaa] whitespace-nowrap">
-        {remaining} script{remaining !== 1 ? 's' : ''} left
+        {remaining} rewrite{remaining !== 1 ? 's' : ''} left
       </span>
     </div>
   );
@@ -207,21 +219,26 @@ export function TopicInput({
 
 export function RewriteResult({
   result,
+  saved,
   onReset,
 }: {
   result: string;
+  saved: boolean;
   onReset: () => void;
 }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Your rewritten script</p>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Your rewritten script</p>
+          {saved && <p className="mt-1 text-xs text-[#888]">Saved to your workspace automatically. Tiny miracle, no clipboard séance required.</p>}
+        </div>
         <button
           type="button"
           onClick={() => navigator.clipboard.writeText(result)}
           className="text-xs text-[#DC2626] hover:underline"
         >
-          Copy to clipboard
+          Copy
         </button>
       </div>
       <div className="rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-5">

@@ -29,6 +29,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (plan.id === 'lifetime') {
+      const { data: founding, error: foundingError } = await supabase
+        .from('founding_members')
+        .select('count,max')
+        .eq('id', '1')
+        .single();
+
+      if (foundingError) {
+        return NextResponse.json({ error: 'Could not verify founding seats' }, { status: 500 });
+      }
+
+      if (founding && founding.count >= founding.max) {
+        return NextResponse.json({ error: 'Founding deal sold out' }, { status: 409 });
+      }
+    }
+
     const mode = plan.id === 'lifetime' ? 'payment' : 'subscription';
     const siteUrl = getSiteUrl();
 

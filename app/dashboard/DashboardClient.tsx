@@ -40,6 +40,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
     saveHook,
     rejectHook,
     unsaveHook,
+    saveRewrite,
     resetRejectedHooks,
   } = useLocalWorkspace();
 
@@ -112,12 +113,19 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         </div>
       )}
 
-      {rewriteHook && <RewritePanel hook={rewriteHook} onClose={() => setRewriteHook(null)} />}
+      {rewriteHook && (
+        <RewritePanel
+          hook={rewriteHook}
+          onClose={() => setRewriteHook(null)}
+          onSaveRewrite={saveRewrite}
+        />
+      )}
 
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         <DashboardSidebar
           profile={workspace.profile}
           savedHooks={workspace.savedHooks}
+          savedRewrites={workspace.savedRewrites}
           userLabel={profile?.name ?? user?.email?.split('@')[0] ?? 'Creator'}
           planLabel={planLabel(profile?.plan)}
           scriptsLabel={scriptsLabel}

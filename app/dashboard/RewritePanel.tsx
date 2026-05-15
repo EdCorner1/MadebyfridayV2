@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Hook } from './types';
+import { Hook, SavedRewrite } from './types';
 import { useAuth } from '../components/AuthProvider';
 import AuthModal from '../components/AuthModal';
 import { supabase } from '../lib/supabase';
@@ -20,6 +20,7 @@ import { loadWorkspace } from './localWorkspace';
 interface RewritePanelProps {
   hook: Hook;
   onClose: () => void;
+  onSaveRewrite: (rewrite: SavedRewrite) => void;
 }
 
 function getSavedPlatform(): string {
@@ -31,7 +32,12 @@ async function getSessionToken() {
   return data.session?.access_token || '';
 }
 
-export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
+function makeRewriteId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  return `rewrite-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePanelProps) {
   const { user, profile, refreshProfile } = useAuth();
   const [userTopic, setUserTopic] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
@@ -40,6 +46,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
   const [extracting, setExtracting] = useState(false);
   const [transcriptStatus, setTranscriptStatus] = useState('');
   const [result, setResult] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -102,9 +109,11 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
 
     setLoading(true);
     setError(null);
+    setSaved(false);
 
     try {
       const token = await getSessionToken();
+      const platform = getSavedPlatform();
       const response = await fetch('/api/rewrite', {
         method: 'POST',
         headers: {
@@ -115,7 +124,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
           referenceHook: hook.name,
           referenceType: hook.type,
           userTopic: userTopic.trim(),
-          platform: getSavedPlatform(),
+          platform,
           transcript: transcriptInput.trim() || undefined,
           rewriteStrategy: hook.rewrite_strategy,
         }),
@@ -123,7 +132,19 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
 
       const data = await response.json();
       if (data.script) {
-        setResult(data.script);
+        const script = data.script.trim();
+        setResult(script);
+        onSaveRewrite({
+          id: makeRewriteId(),
+          hook,
+          topic: userTopic.trim(),
+          platform,
+          transcript: transcriptInput.trim() || undefined,
+          script,
+          remaining: data.remaining,
+          createdAt: new Date().toISOString(),
+        });
+        setSaved(true);
         await refreshProfile();
       } else if (data.upgrade) {
         setShowUpgrade(true);
@@ -140,7 +161,7 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
   if (!user) {
     return (
       <>
-        <AuthRequiredPrompt setAuthMode={setAuthMode} />
+        <AuthRequiredPrompt setAuthMode={setAuthMode} onClose={onClose} />
         <AuthModal mode={authMode} onClose={onClose} onSuccess={() => {}} />
       </>
     );
@@ -155,9 +176,11 @@ export default function RewritePanel({ hook, onClose }: RewritePanelProps) {
       {result ? (
         <RewriteResult
           result={result}
+          saved={saved}
           onReset={() => {
             setResult(null);
             setUserTopic('');
+            setSaved(false);
           }}
         />
       ) : (

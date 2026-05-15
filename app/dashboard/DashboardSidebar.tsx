@@ -1,9 +1,10 @@
 import Image from 'next/image';
-import { Hook, CreatorProfile } from './types';
+import { Hook, CreatorProfile, SavedRewrite } from './types';
 
 type DashboardSidebarProps = {
   profile: CreatorProfile | null;
   savedHooks: Hook[];
+  savedRewrites: SavedRewrite[];
   userLabel: string;
   planLabel: string;
   scriptsLabel: string | null;
@@ -33,6 +34,7 @@ function NavButton({ children, onClick }: { children: React.ReactNode; onClick?:
 export default function DashboardSidebar({
   profile,
   savedHooks,
+  savedRewrites,
   userLabel,
   planLabel,
   scriptsLabel,
@@ -81,7 +83,7 @@ export default function DashboardSidebar({
         <nav className="space-y-1 text-sm">
           <NavButton onClick={onNewSearch}>New search</NavButton>
           <NavButton>Saved hooks ({savedHooks.length})</NavButton>
-          <NavButton>Planner</NavButton>
+          <NavButton>Saved rewrites ({savedRewrites.length})</NavButton>
           <NavButton onClick={onEditProfile}>Creator profile</NavButton>
         </nav>
 
@@ -95,7 +97,7 @@ export default function DashboardSidebar({
             <p className="text-sm leading-5 text-[#aaa]">Save hooks worth stealing. Friday will keep them here.</p>
           ) : (
             <div className="space-y-2">
-              {savedHooks.slice(0, 6).map((hook) => (
+              {savedHooks.slice(0, 4).map((hook) => (
                 <div key={hook.url} className="rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-3">
                   <p className="line-clamp-2 text-xs font-medium leading-snug text-[#222]">{hook.name}</p>
                   <div className="mt-2 flex items-center gap-2">
@@ -106,6 +108,24 @@ export default function DashboardSidebar({
                       Remove
                     </button>
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="my-4 h-px bg-[#ece7df]" />
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Saved rewrites</p>
+            <span className="text-xs text-[#bbb]">{savedRewrites.length}</span>
+          </div>
+          {savedRewrites.length === 0 ? (
+            <p className="text-sm leading-5 text-[#aaa]">Your rewritten scripts will save here after Friday cooks.</p>
+          ) : (
+            <div className="space-y-2">
+              {savedRewrites.slice(0, 3).map((rewrite) => (
+                <div key={rewrite.id} className="rounded-[14px] border border-[#ece7df] bg-[#fffaf7] p-3">
+                  <p className="line-clamp-2 text-xs font-medium leading-snug text-[#222]">{rewrite.topic || rewrite.hook.name}</p>
+                  <p className="mt-1 text-[10px] text-[#aaa]">{new Date(rewrite.createdAt).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
