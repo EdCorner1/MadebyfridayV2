@@ -22,7 +22,7 @@ export const PLANS: PlanConfig[] = [
     price: '$0',
     interval: 'forever',
     scripts: '10 rewrites/month',
-    description: 'Search hooks, save ideas, and try Friday before handing over money like a responsible adult.',
+    description: 'Search hooks, save ideas, and try Friday before upgrading.',
     cta: 'Start free',
     public: true,
   },

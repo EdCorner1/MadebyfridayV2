@@ -7,10 +7,12 @@ export type RawHook = {
   hookType?: string;
   sourceUrl?: string;
   randomNumber?: string | number;
+  platforms?: string[];
   niches?: string[];
   mechanisms?: string[];
   emotional_drivers?: string[];
   best_for?: string[];
+  difficulty?: string;
   rewrite_strategy?: string;
 };
 
@@ -24,6 +26,11 @@ export type HookResult = {
   structures?: string[];
   emotional_beat?: string;
   rewrite_strategy?: string;
+  platforms?: string[];
+  mechanisms?: string[];
+  emotional_drivers?: string[];
+  best_for?: string[];
+  difficulty?: string;
 };
 
 let cachedHooks: RawHook[] | null = null;
@@ -171,5 +178,10 @@ export async function searchHooks(query = '', limit = 6): Promise<HookResult[]> 
     structures: hook.mechanisms,
     emotional_beat: hook.emotional_drivers?.join(', '),
     rewrite_strategy: hook.rewrite_strategy,
+    platforms: hook.platforms,
+    mechanisms: hook.mechanisms,
+    emotional_drivers: hook.emotional_drivers,
+    best_for: hook.best_for,
+    difficulty: hook.difficulty,
   }));
 }

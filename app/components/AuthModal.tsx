@@ -139,7 +139,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
           </p>
 
           <p className="mt-3 text-center text-xs text-[#ccc]">
-            Google sign-in is coming after the branded OAuth setup. No suspicious alphabet-soup login screens here.
+            Google sign-in is coming after branded OAuth setup.
           </p>
         </div>
       </div>

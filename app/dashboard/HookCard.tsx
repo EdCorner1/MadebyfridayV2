@@ -1,3 +1,5 @@
+'use client';
+
 import { Hook } from './types';
 
 interface HookCardProps {
@@ -7,6 +9,7 @@ interface HookCardProps {
   onSave: () => void;
   onReject: () => void;
   onRewrite: () => void;
+  onPreview: (hook: Hook, index: number) => void;
 }
 
 function getHost(url: string): string {
@@ -17,62 +20,93 @@ function getHost(url: string): string {
   }
 }
 
-function getInstagramEmbedUrl(url: string): string | null {
-  try {
-    const parsed = new URL(url);
-    if (!parsed.hostname.includes('instagram.com')) return null;
-
-    const match = parsed.pathname.match(/^\/(p|reel|tv)\/([^/]+)/);
-    if (!match) return null;
-
-    return `https://www.instagram.com/${match[1]}/${match[2]}/embed`;
-  } catch {
-    return null;
-  }
+function PlayIcon({ className = '' }: { className?: string }) {
+  return (
+    <span className={`flex items-center justify-center rounded-full ${className}`} aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </span>
+  );
 }
 
-function PreviewTile({ hook, index }: { hook: Hook; index: number }) {
-  const embedUrl = getInstagramEmbedUrl(hook.url);
+function formatTag(tag: string): string {
+  return tag.replace(/[_-]/g, ' ');
+}
+
+function takeTags(tags?: string[], limit = 3): string[] {
+  return (tags ?? []).filter(Boolean).slice(0, limit);
+}
+
+export function HookMeta({ hook }: { hook: Hook }) {
+  const tags = [
+    ...takeTags(hook.mechanisms, 2),
+    ...takeTags(hook.emotional_drivers, 1),
+    ...(hook.difficulty ? [hook.difficulty] : []),
+  ];
+
+  if (tags.length === 0) return null;
 
   return (
-    <div className="group relative aspect-[9/16] w-full overflow-hidden rounded-[11px] bg-[#111] text-left shadow-sm">
-      {embedUrl ? (
-        <iframe
-          src={embedUrl}
-          title={`Reference video ${index + 1}`}
-          loading="lazy"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          className="absolute inset-0 h-full w-full border-0 bg-white"
-        />
-      ) : (
-        <>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(220,38,38,0.72),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
-          <div className="absolute inset-0 bg-black/10" />
-          <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-[#111] shadow-sm">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-            <p className="line-clamp-2 text-xs font-medium leading-snug text-white/90">Reference pattern</p>
-          </div>
-        </>
-      )}
+    <div className="mt-3 flex flex-wrap gap-1.5">
+      {tags.slice(0, 4).map((tag) => (
+        <span
+          key={tag}
+          className="rounded-full bg-[#fafaf8] px-2 py-1 text-[10px] font-medium capitalize text-[#787167]"
+        >
+          {formatTag(tag)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+export function PatternPreviewTile({ hook, index, compact = false }: { hook: Hook; index: number; compact?: boolean }) {
+  const source = getHost(hook.url);
+
+  return (
+    <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[14px] bg-[#111] text-left shadow-sm">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(220,38,38,0.78),transparent_34%),linear-gradient(145deg,#171717,#2b211c_48%,#ff6b35)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10),rgba(0,0,0,0.62))]" />
+      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_center,white_1px,transparent_1px)] [background-size:18px_18px]" />
 
       <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-[#111] shadow-sm">
-        {getHost(hook.url)}
+        {source}
       </div>
       <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/45 px-2 py-1 text-[9px] font-semibold text-white shadow-sm">
         #{index + 1}
+      </div>
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <PlayIcon className={`${compact ? 'h-12 w-12' : 'h-16 w-16'} bg-white/95 text-[#111] shadow-lg`} />
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">Pattern preview</p>
+        <p className={`${compact ? 'line-clamp-3 text-[11px]' : 'line-clamp-2 text-xs'} font-medium leading-snug text-white/90`}>{hook.name || 'Reference pattern'}</p>
       </div>
     </div>
   );
 }
 
-export default function HookCard({ hook, index, isSaved, onSave, onReject, onRewrite }: HookCardProps) {
+function PreviewButton({ hook, index, onPreview }: { hook: Hook; index: number; onPreview: (hook: Hook, index: number) => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onPreview(hook, index)}
+      className="group relative w-full rounded-[14px] focus:outline-none focus:ring-2 focus:ring-[#DC2626] focus:ring-offset-2"
+      aria-label={`Open reference pattern ${index + 1}`}
+    >
+      <PatternPreviewTile hook={hook} index={index} />
+      <div className="absolute inset-0 rounded-[14px] ring-0 ring-white/0 transition group-hover:bg-white/5" />
+    </button>
+  );
+}
+
+export default function HookCard({ hook, index, isSaved, onSave, onReject, onRewrite, onPreview }: HookCardProps) {
   return (
     <article className="flex flex-col rounded-[15px] border border-[#ece7df] bg-white p-2.5 shadow-sm transition-shadow hover:shadow-md">
-      <PreviewTile hook={hook} index={index} />
+      <PreviewButton hook={hook} index={index} onPreview={onPreview} />
 
       <div className="flex flex-1 flex-col pt-3.5">
         <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-[#787167]">{hook.type}</p>
@@ -81,6 +115,8 @@ export default function HookCard({ hook, index, isSaved, onSave, onReject, onRew
         {hook.rewrite_strategy && (
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#888]">{hook.rewrite_strategy}</p>
         )}
+
+        <HookMeta hook={hook} />
 
         <div className="mt-4 grid grid-cols-[1fr_auto_auto] items-center gap-2">
           <button

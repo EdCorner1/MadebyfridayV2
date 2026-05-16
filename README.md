@@ -1,36 +1,142 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Made by Friday
 
-## Getting Started
+Made by Friday is a viral-hook and script-rewrite tool for creators.
 
-First, run the development server:
+Flow:
+
+1. User describes what they make.
+2. Friday finds relevant viral hook patterns.
+3. User previews/saves/rejects patterns.
+4. User signs up when ready to rewrite.
+5. Friday returns a structured script with explanation, first-frame idea, caption/CTA, and alternate hooks.
+
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example`.
 
-## Learn More
+Core:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+OPENROUTER_API_KEY=
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Supabase:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
 
-## Deploy on Vercel
+Stripe:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_LIFETIME=
+STRIPE_PRICE_PRO_MONTHLY=
+STRIPE_PRICE_MAX_MONTHLY=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Current public offer uses `STRIPE_PRICE_LIFETIME` for the $19 Founding Pro lifetime plan.
+
+## Supabase setup
+
+Run `supabase_schema.sql` in Supabase SQL Editor.
+
+It creates:
+
+- `profiles`
+- `saved_hooks`
+- `founding_members`
+- `stripe_events`
+- `purchases`
+- signup trigger for profile creation
+- `claim_founding_seat()` RPC
+- RLS policies
+
+## Stripe setup
+
+Required Stripe items:
+
+1. Create one-time price for Founding Pro lifetime.
+2. Set `STRIPE_PRICE_LIFETIME` to that price ID.
+3. Configure webhook endpoint:
+   - `/api/stripe/webhook`
+4. Subscribe webhook to:
+   - `checkout.session.completed`
+   - `customer.subscription.deleted`
+5. Set `STRIPE_WEBHOOK_SECRET`.
+
+Checkout route:
+
+- `POST /api/checkout`
+- Requires authenticated Supabase bearer token.
+- Body: `{ "planId": "lifetime" }`
+
+Webhook updates:
+
+- `profiles.plan`
+- founding member seat count
+- `purchases` ledger
+- `stripe_events` idempotency table
+
+## Pre-launch smoke test
+
+Run before promoting the paid offer:
+
+- [ ] Homepage prompt routes to `/dashboard?q=...`
+- [ ] Dashboard returns 6 relevant reference patterns
+- [ ] Pattern preview modal opens and does not expose Instagram links
+- [ ] Save hook works locally
+- [ ] Signup creates profile
+- [ ] Signin restores workspace
+- [ ] Rewrite button opens rewrite panel
+- [ ] Rewrite returns structured result:
+  - script
+  - why it works
+  - first-frame visual
+  - caption/CTA
+  - alternates
+- [ ] Rewrite saves to workspace
+- [ ] Free quota decrements
+- [ ] Upgrade page loads
+- [ ] Founding Pro checkout session opens
+- [ ] Stripe webhook upgrades user to lifetime
+- [ ] Founding seat count increments once
+- [ ] Billing cancel/success pages render
+- [ ] `npm run lint` passes
+- [ ] `npm run build` passes
+
+## Launch positioning
+
+Primary message:
+
+> Find viral hook patterns and rewrite them for your niche.
+
+Build-in-public angle:
+
+> I’m building an AI that helps creators use viral structure without copying content.
+
+Initial offer:
+
+- Free: 10 rewrites/month
+- Founding Pro: $19 one-time for first 100 creators
+
+## Useful commands
+
+```bash
+npm run lint
+npm run build
+npm run dev
+```

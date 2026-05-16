@@ -10,5 +10,12 @@ export async function getHooksFromQuery(query: string): Promise<Hook[]> {
     url: hook.url,
     number: hook.number,
     rewrite_strategy: hook.rewrite_strategy,
+    platforms: hook.platforms,
+    niches: hook.niches,
+    mechanisms: hook.structures,
+    emotional_drivers: hook.emotional_beat ? hook.emotional_beat.split(',').map((item) => item.trim()).filter(Boolean) : undefined,
+    best_for: hook.best_for,
+    difficulty: hook.difficulty,
+    score: hook.score,
   }));
 }

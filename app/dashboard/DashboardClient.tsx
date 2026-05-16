@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import HookGrid from './HookGrid';
 import DashboardSidebar from './DashboardSidebar';
 import RewritePanel from './RewritePanel';
+import PatternLightbox from './PatternLightbox';
 import Onboarding from '../components/Onboarding';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../components/AuthProvider';
@@ -33,6 +34,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [searchQuery, setSearchQuery] = useState(userPrompt);
   const [rewriteHook, setRewriteHook] = useState<Hook | null>(null);
+  const [previewHook, setPreviewHook] = useState<{ hook: Hook; index: number } | null>(null);
   const {
     workspace,
     replaceWorkspace,
@@ -83,6 +85,8 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
 
   const openSignIn = () => { setAuthMode('signin'); setShowAuth(true); };
   const openSignUp = () => { setAuthMode('signup'); setShowAuth(true); };
+  const scrollToSavedHooks = () => document.getElementById('saved-hooks')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToSavedRewrites = () => document.getElementById('saved-rewrites')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const isLongForm = workspace.profile?.platform === 'youtube-long';
   const displayTopic = userPrompt || workspace.profile?.niche || null;
@@ -113,6 +117,15 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         </div>
       )}
 
+      {previewHook && (
+        <PatternLightbox
+          hook={previewHook.hook}
+          index={previewHook.index}
+          onClose={() => setPreviewHook(null)}
+          onRewrite={() => setRewriteHook(previewHook.hook)}
+        />
+      )}
+
       {rewriteHook && (
         <RewritePanel
           hook={rewriteHook}
@@ -131,6 +144,8 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
           scriptsLabel={scriptsLabel}
           isSignedIn={Boolean(user)}
           onNewSearch={() => document.getElementById('dashboard-search')?.focus()}
+          onShowSavedHooks={scrollToSavedHooks}
+          onShowSavedRewrites={scrollToSavedRewrites}
           onEditProfile={() => setShowOnboarding(true)}
           onRewrite={setRewriteHook}
           onUnsave={unsaveHook}
@@ -217,6 +232,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
             onRejectHook={rejectHook}
             onResetRejectedHooks={resetRejectedHooks}
             onRewriteHook={setRewriteHook}
+            onPreviewHook={(hook, index) => setPreviewHook({ hook, index })}
           />
         </main>
       </div>

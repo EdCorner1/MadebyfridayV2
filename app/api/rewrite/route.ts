@@ -11,12 +11,62 @@ type RewriteRequest = {
   transcript?: string;
   sourceUrl?: string;
   rewriteStrategy?: string;
+  mechanisms?: string[];
+  emotionalDrivers?: string[];
+  bestFor?: string[];
+  difficulty?: string;
+};
+
+type StructuredRewrite = {
+  script: string;
+  why_it_works?: string;
+  first_frame?: string;
+  caption_cta?: string;
+  alternates?: string[];
 };
 
 function shouldResetScripts(resetAt: string): boolean {
   const reset = new Date(resetAt);
   const now = new Date();
   return now.getMonth() !== reset.getMonth() || now.getFullYear() !== reset.getFullYear();
+}
+
+function extractJsonObject(input: string): StructuredRewrite | null {
+  try {
+    return JSON.parse(input) as StructuredRewrite;
+  } catch {}
+
+  const match = input.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+
+  try {
+    return JSON.parse(match[0]) as StructuredRewrite;
+  } catch {
+    return null;
+  }
+}
+
+function normaliseRewrite(raw: string): StructuredRewrite {
+  const parsed = extractJsonObject(raw);
+  if (parsed?.script) {
+    return {
+      script: parsed.script.trim(),
+      why_it_works: parsed.why_it_works?.trim(),
+      first_frame: parsed.first_frame?.trim(),
+      caption_cta: parsed.caption_cta?.trim(),
+      alternates: Array.isArray(parsed.alternates)
+        ? parsed.alternates.map((alternate) => String(alternate).trim()).filter(Boolean).slice(0, 3)
+        : [],
+    };
+  }
+
+  return {
+    script: raw.trim(),
+    why_it_works: 'This rewrite keeps the reference pattern but adapts the promise, audience, and tension to your angle.',
+    first_frame: 'Open with the clearest visual proof of the problem or result before you speak.',
+    caption_cta: 'Save this if you want the shortcut version.',
+    alternates: [],
+  };
 }
 
 async function getAuthedProfile(req: NextRequest): Promise<{ profile: Profile; userId: string } | { error: NextResponse }> {
@@ -75,7 +125,19 @@ async function incrementUsage(userId: string, profile: Profile) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { referenceHook, referenceType, userTopic, platform, transcript, sourceUrl, rewriteStrategy } = await req.json() as RewriteRequest;
+    const {
+      referenceHook,
+      referenceType,
+      userTopic,
+      platform,
+      transcript,
+      sourceUrl,
+      rewriteStrategy,
+      mechanisms,
+      emotionalDrivers,
+      bestFor,
+      difficulty,
+    } = await req.json() as RewriteRequest;
 
     if (!referenceHook || (!userTopic && !transcript)) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -102,19 +164,27 @@ export async function POST(req: NextRequest) {
     const systemPrompt = `You are Friday — a sharp viral content strategist.
 
 Rewrite creator content using the reference hook's emotional structure.
-- Short-form: write a punchy 3-second hook plus a tight follow-up beat.
-- YouTube-long: write an intro sequence: Hook -> Stakes -> Promise -> Bridge.
 - Preserve the emotional mechanic, not the exact words.
+- Short-form: write ready-to-read spoken copy with a punchy 3-second hook.
+- YouTube-long: write an intro sequence: Hook -> Stakes -> Promise -> Bridge.
+- Include creator coaching that is useful but concise.
 - If a transcript is provided, use its concrete details and rhythm.
-- Format as ready-to-read copy. No preamble. No explanation.`;
+- Return ONLY valid JSON. No markdown. No commentary.`;
 
     const userPrompt = `Reference hook: "${referenceHook}"
 Hook type: ${referenceType ?? 'Unknown'}
 Platform: ${platform ?? 'short-form'}
 Topic/angle: ${userTopic ?? 'Use transcript context'}
-${sourceUrl ? `Original source URL: ${sourceUrl}\n` : ''}${rewriteStrategy ? `Rewrite strategy: ${rewriteStrategy}\n` : ''}${transcript ? `\nTranscript to learn from:\n${transcript.slice(0, 3500)}` : ''}
+${sourceUrl ? `Original source URL: ${sourceUrl}\n` : ''}${rewriteStrategy ? `Rewrite strategy: ${rewriteStrategy}\n` : ''}${mechanisms?.length ? `Pattern mechanics: ${mechanisms.join(', ')}\n` : ''}${emotionalDrivers?.length ? `Emotional drivers: ${emotionalDrivers.join(', ')}\n` : ''}${bestFor?.length ? `Best for: ${bestFor.join(', ')}\n` : ''}${difficulty ? `Difficulty: ${difficulty}\n` : ''}${transcript ? `\nTranscript to learn from:\n${transcript.slice(0, 3500)}` : ''}
 
-Output only the rewritten script.`;
+Return this JSON shape exactly:
+{
+  "script": "ready-to-read creator script",
+  "why_it_works": "one concise explanation of the psychology/pattern",
+  "first_frame": "specific first visual/frame idea",
+  "caption_cta": "caption or CTA text",
+  "alternates": ["alternate hook 1", "alternate hook 2"]
+}`;
 
     const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -130,25 +200,68 @@ Output only the rewritten script.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
         ],
-        max_tokens: 600,
+        response_format: { type: 'json_object' },
+        max_tokens: 520,
       }),
     });
 
     if (!openrouterRes.ok) {
-      return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
+      const errorText = await openrouterRes.text();
+      console.error('[rewrite] OpenRouter request failed', openrouterRes.status, errorText.slice(0, 500));
+
+      const retryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://madebyfriday.tech',
+          'X-Title': 'Made by Friday',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.0-flash-lite-001',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          max_tokens: 520,
+        }),
+      });
+
+      if (!retryRes.ok) {
+        const retryErrorText = await retryRes.text();
+        console.error('[rewrite] OpenRouter retry failed', retryRes.status, retryErrorText.slice(0, 500));
+        return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
+      }
+
+      const retryData = await retryRes.json();
+      const retryContent = retryData?.choices?.[0]?.message?.content;
+      if (!retryContent) {
+        return NextResponse.json({ error: 'No response from AI' }, { status: 500 });
+      }
+
+      const rewrite = normaliseRewrite(retryContent);
+      await incrementUsage(auth.userId, auth.profile);
+      const nextRemaining = remaining === -1 ? -1 : Math.max(0, remaining - 1);
+      return NextResponse.json({ script: rewrite.script, rewrite, remaining: nextRemaining });
     }
 
     const data = await openrouterRes.json();
-    const script = data?.choices?.[0]?.message?.content;
+    const content = data?.choices?.[0]?.message?.content;
 
-    if (!script) {
+    if (!content) {
       return NextResponse.json({ error: 'No response from AI' }, { status: 500 });
     }
+
+    const rewrite = normaliseRewrite(content);
 
     await incrementUsage(auth.userId, auth.profile);
 
     const nextRemaining = remaining === -1 ? -1 : Math.max(0, remaining - 1);
-    return NextResponse.json({ script: script.trim(), remaining: nextRemaining });
+    return NextResponse.json({
+      script: rewrite.script,
+      rewrite,
+      remaining: nextRemaining,
+    });
   } catch (error) {
     console.error('Rewrite error:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

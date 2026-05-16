@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Hook, SavedRewrite } from './types';
+import { Hook, SavedRewrite, StructuredRewrite } from './types';
 import { useAuth } from '../components/AuthProvider';
 import AuthModal from '../components/AuthModal';
 import { supabase } from '../lib/supabase';
@@ -40,10 +40,11 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
   const { user, profile, refreshProfile } = useAuth();
   const [userTopic, setUserTopic] = useState('');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<StructuredRewrite | null>(null);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
   const canRewrite = Boolean(userTopic.trim());
@@ -53,6 +54,7 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
     if (!canRewrite) return;
     if (!user) {
       setAuthMode('signup');
+      setShowAuth(true);
       return;
     }
     if (showUpgrade || quotaBlocked) return;
@@ -77,19 +79,28 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           platform,
           sourceUrl: hook.url,
           rewriteStrategy: hook.rewrite_strategy,
+          mechanisms: hook.mechanisms,
+          emotionalDrivers: hook.emotional_drivers,
+          bestFor: hook.best_for,
+          difficulty: hook.difficulty,
         }),
       });
 
       const data = await response.json();
       if (data.script) {
-        const script = data.script.trim();
-        setResult(script);
+        const rewrite: StructuredRewrite = data.rewrite?.script
+          ? data.rewrite
+          : { script: data.script.trim() };
+        const script = rewrite.script.trim();
+        const structured = { ...rewrite, script };
+        setResult(structured);
         onSaveRewrite({
           id: makeRewriteId(),
           hook,
           topic: userTopic.trim(),
           platform,
           script,
+          structured,
           remaining: data.remaining,
           createdAt: new Date().toISOString(),
         });
@@ -108,11 +119,28 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
   };
 
   if (!user) {
+    if (showAuth) {
+      return (
+        <AuthModal
+          mode={authMode}
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => setShowAuth(false)}
+        />
+      );
+    }
+
     return (
-      <>
-        <AuthRequiredPrompt setAuthMode={setAuthMode} onClose={onClose} />
-        <AuthModal mode={authMode} onClose={onClose} onSuccess={() => {}} />
-      </>
+      <AuthRequiredPrompt
+        onClose={onClose}
+        onSignupClick={() => {
+          setAuthMode('signup');
+          setShowAuth(true);
+        }}
+        onSigninClick={() => {
+          setAuthMode('signin');
+          setShowAuth(true);
+        }}
+      />
     );
   }
 
@@ -121,10 +149,10 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
   }
 
   return (
-    <RewriteShell hookType={hook.type} hookName={hook.name} sourceUrl={hook.url} onClose={onClose}>
+    <RewriteShell hook={hook} onClose={onClose}>
       {result ? (
         <RewriteResult
-          result={result}
+          rewrite={result}
           saved={saved}
           onReset={() => {
             setResult(null);
@@ -141,9 +169,9 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
             <p className="mt-2 text-sm leading-6 text-[#666]">
               Friday already has the original source URL. Just tell her what you want to make and she&apos;ll adapt the pattern for your angle.
             </p>
-            <a href={hook.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex text-xs font-medium text-[#DC2626] hover:underline">
-              View original reference →
-            </a>
+            <p className="mt-2 text-xs font-medium text-[#787167]">
+              Preview stays inside Friday, without sending users to Instagram.
+            </p>
           </div>
 
           <TopicInput value={userTopic} hasTranscript={false} onChange={setUserTopic} />
@@ -160,7 +188,7 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           </button>
 
           <p className="text-xs text-center text-[#ccc]">
-            Friday uses the reference hook structure and source context. No paste-the-URL busywork. We are not running a clerical circus.
+            Friday uses the reference hook structure and source context. No extra URL pasting needed.
           </p>
         </div>
       )}

@@ -24,7 +24,7 @@ export default function PricingSection() {
       const token = data.session?.access_token;
 
       if (!token) {
-        setError('Create a free account first, then upgrade. Annoying, yes. Useful for saving your plan, also yes.');
+        setError('Create a free account first, then upgrade so your plan is saved.');
         return;
       }
 
@@ -55,10 +55,10 @@ export default function PricingSection() {
       <div className="mb-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/70">Pricing</p>
         <h2 className="mt-3 font-display text-4xl font-medium tracking-[-0.035em] text-charcoal sm:text-5xl">
-          Start free. Upgrade when Friday earns her keep.
+          Start free. Upgrade when you want more.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-charcoal/55 sm:text-base">
-          Keep the front door frictionless. Pay when you want more rewrites, more hooks, and less content-idea swamp goblin behaviour.
+          Start free. Upgrade when you want more rewrites, saved hooks, and a stronger content workflow.
         </p>
       </div>
 
