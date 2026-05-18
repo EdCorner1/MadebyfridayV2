@@ -180,10 +180,10 @@ ${sourceUrl ? `Original source URL: ${sourceUrl}\n` : ''}${rewriteStrategy ? `Re
 Return this JSON shape exactly:
 {
   "script": "ready-to-read creator script",
-  "why_it_works": "one concise explanation of the psychology/pattern",
-  "first_frame": "specific first visual/frame idea",
-  "caption_cta": "caption or CTA text",
-  "alternates": ["alternate hook 1", "alternate hook 2"]
+  "why_it_works": "one short explanation",
+  "first_frame": "specific first visual",
+  "caption_cta": "caption/CTA",
+  "alternates": ["alternate hook 1"]
 }`;
 
     const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -201,7 +201,7 @@ Return this JSON shape exactly:
           { role: 'user', content: userPrompt },
         ],
         response_format: { type: 'json_object' },
-        max_tokens: 520,
+        max_tokens: 420,
       }),
     });
 
@@ -223,7 +223,7 @@ Return this JSON shape exactly:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          max_tokens: 520,
+          max_tokens: 420,
         }),
       });
 
