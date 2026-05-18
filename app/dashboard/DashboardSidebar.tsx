@@ -1,19 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Hook, CreatorProfile, SavedRewrite } from './types';
+import { Hook, SavedRewrite } from './types';
 
 type DashboardSidebarProps = {
-  profile: CreatorProfile | null;
   savedHooks: Hook[];
   savedRewrites: SavedRewrite[];
   userLabel: string;
+  avatarUrl?: string | null;
   planLabel: string;
   scriptsLabel: string | null;
   isSignedIn: boolean;
   onNewSearch: () => void;
   onShowSavedHooks: () => void;
   onShowSavedRewrites: () => void;
-  onEditProfile: () => void;
+  onEditAccount: () => void;
   onRewrite: (hook: Hook) => void;
   onUnsave: (url: string) => void;
   onSignIn: () => void;
@@ -35,17 +35,17 @@ function NavButton({ children, onClick }: { children: React.ReactNode; onClick: 
 }
 
 export default function DashboardSidebar({
-  profile,
   savedHooks,
   savedRewrites,
   userLabel,
+  avatarUrl,
   planLabel,
   scriptsLabel,
   isSignedIn,
   onNewSearch,
   onShowSavedHooks,
   onShowSavedRewrites,
-  onEditProfile,
+  onEditAccount,
   onRewrite,
   onUnsave,
   onSignIn,
@@ -65,12 +65,21 @@ export default function DashboardSidebar({
 
         <div className="rounded-[18px] border border-[#ece7df] bg-[#fafaf8] p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#DC2626] font-semibold text-white">
-              {initials(profile?.name || userLabel)}
-            </div>
+            <button
+              type="button"
+              onClick={isSignedIn ? onEditAccount : onSignUp}
+              className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#DC2626] font-semibold text-white transition hover:scale-[1.03]"
+              aria-label="Edit profile"
+            >
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt="" width={44} height={44} className="h-full w-full object-cover" unoptimized />
+              ) : (
+                initials(userLabel)
+              )}
+            </button>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[#111]">{profile?.name || userLabel}</p>
-              <p className="truncate text-xs text-[#888]">{profile?.niche || 'Creator workspace'}</p>
+              <p className="truncate text-sm font-semibold text-[#111]">{userLabel}</p>
+              <p className="truncate text-xs text-[#888]">{isSignedIn ? 'Creator workspace' : 'Sign in to save your workspace'}</p>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -81,9 +90,12 @@ export default function DashboardSidebar({
 
         <nav className="space-y-1 text-sm">
           <NavButton onClick={onNewSearch}>New search</NavButton>
+          <Link href="/dashboard" className="block w-full rounded-xl px-3 py-2 text-left font-medium text-[#333] hover:bg-[#f7f4ee]">
+            Workspace
+          </Link>
           <NavButton onClick={onShowSavedHooks}>Saved hooks ({savedHooks.length})</NavButton>
           <NavButton onClick={onShowSavedRewrites}>Saved rewrites ({savedRewrites.length})</NavButton>
-          <NavButton onClick={onEditProfile}>Creator profile</NavButton>
+          {isSignedIn && <NavButton onClick={onEditAccount}>Edit profile</NavButton>}
         </nav>
 
         <div className="min-h-0 flex-1 overflow-y-auto rounded-[18px] border border-[#ece7df] bg-white p-3">
@@ -131,12 +143,16 @@ export default function DashboardSidebar({
         <div className="rounded-[18px] border border-[#ece7df] bg-[#fafaf8] p-3">
           {isSignedIn ? (
             <div className="space-y-2">
-              {planLabel !== 'Founding Pro' && <Link href="/upgrade" className="block w-full rounded-full bg-[#DC2626] px-3 py-2 text-center text-xs font-medium text-white">Upgrade to Founding Pro</Link>}
+              {planLabel === 'Free' && (
+                <Link href="/upgrade" className="block w-full rounded-full bg-[#DC2626] px-3 py-2 text-center text-xs font-medium text-white hover:opacity-90">
+                  Go unlimited
+                </Link>
+              )}
               <button type="button" onClick={onSignOut} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777] hover:text-[#333]">Sign out</button>
             </div>
           ) : (
             <div className="space-y-2">
-              <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#DC2626] px-3 py-2 text-xs font-medium text-white">Get 10 free rewrites</button>
+              <button type="button" onClick={onSignUp} className="w-full rounded-full bg-[#DC2626] px-3 py-2 text-xs font-medium text-white">Create account</button>
               <button type="button" onClick={onSignIn} className="w-full rounded-full border border-[#e0ddd6] bg-white px-3 py-2 text-xs font-medium text-[#777]">Sign in</button>
             </div>
           )}

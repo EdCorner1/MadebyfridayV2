@@ -18,6 +18,7 @@ import { loadWorkspace } from './localWorkspace';
 
 interface RewritePanelProps {
   hook: Hook;
+  defaultTopic?: string;
   onClose: () => void;
   onSaveRewrite: (rewrite: SavedRewrite) => void;
 }
@@ -36,9 +37,9 @@ function makeRewriteId() {
   return `rewrite-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePanelProps) {
+export default function RewritePanel({ hook, defaultTopic = '', onClose, onSaveRewrite }: RewritePanelProps) {
   const { user, profile, refreshProfile } = useAuth();
-  const [userTopic, setUserTopic] = useState('');
+  const [userTopic, setUserTopic] = useState(defaultTopic);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<StructuredRewrite | null>(null);
   const [saved, setSaved] = useState(false);
@@ -73,12 +74,14 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          referenceHook: hook.name,
+          referenceHook: hook.adapted_hook || hook.name,
           referenceType: hook.type,
           userTopic: userTopic.trim(),
           platform,
           sourceUrl: hook.url,
-          rewriteStrategy: hook.rewrite_strategy,
+          rewriteStrategy: hook.adapted_hook
+            ? `Adapted draft hook: ${hook.adapted_hook}\nOriginal viral structure: ${hook.name}\n${hook.rewrite_strategy ?? ''}`
+            : hook.rewrite_strategy,
           mechanisms: hook.mechanisms,
           emotionalDrivers: hook.emotional_drivers,
           bestFor: hook.best_for,
@@ -156,23 +159,13 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
           saved={saved}
           onReset={() => {
             setResult(null);
-            setUserTopic('');
+            setUserTopic(defaultTopic);
             setSaved(false);
           }}
         />
       ) : (
         <div className="space-y-4">
           {profile && <QuotaBar profile={profile} />}
-
-          <div className="rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Reference source</p>
-            <p className="mt-2 text-sm leading-6 text-[#666]">
-              Friday already has the original source URL. Just tell her what you want to make and she&apos;ll adapt the pattern for your angle.
-            </p>
-            <p className="mt-2 text-xs font-medium text-[#787167]">
-              Preview stays inside Friday, without sending users to Instagram.
-            </p>
-          </div>
 
           <TopicInput value={userTopic} hasTranscript={false} onChange={setUserTopic} />
 
@@ -187,9 +180,6 @@ export default function RewritePanel({ hook, onClose, onSaveRewrite }: RewritePa
             {loading ? 'Friday is rewriting...' : 'Rewrite this for my angle →'}
           </button>
 
-          <p className="text-xs text-center text-[#ccc]">
-            Friday uses the reference hook structure and source context. No extra URL pasting needed.
-          </p>
         </div>
       )}
     </RewriteShell>

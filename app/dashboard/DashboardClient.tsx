@@ -7,11 +7,11 @@ import HookGrid from './HookGrid';
 import DashboardSidebar from './DashboardSidebar';
 import RewritePanel from './RewritePanel';
 import PatternLightbox from './PatternLightbox';
-import Onboarding from '../components/Onboarding';
+import AccountModal from './AccountModal';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../components/AuthProvider';
 import { getScriptLimit, getScriptsRemaining } from '../lib/quota';
-import { Hook, CreatorProfile } from './types';
+import { Hook } from './types';
 import { useLocalWorkspace } from './localWorkspace';
 import { loadWorkspaceFromSupabase, mergeWorkspaces, saveWorkspaceToSupabase } from '../lib/workspaceSync';
 
@@ -22,14 +22,14 @@ interface DashboardClientProps {
 
 function planLabel(plan?: string) {
   if (!plan) return 'Free';
-  if (plan === 'lifetime') return 'Founding Pro';
+  if (plan === 'lifetime') return 'Pro Lifetime';
   return plan.charAt(0).toUpperCase() + plan.slice(1);
 }
 
 export default function DashboardClient({ initialHooks, userPrompt }: DashboardClientProps) {
   const router = useRouter();
-  const { user, profile, loading, signOut } = useAuth();
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const { user, profile, loading, signOut, refreshProfile } = useAuth();
+  const [showAccount, setShowAccount] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [searchQuery, setSearchQuery] = useState(userPrompt);
@@ -38,18 +38,12 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const {
     workspace,
     replaceWorkspace,
-    setProfile: setCreatorProfile,
     saveHook,
     rejectHook,
     unsaveHook,
     saveRewrite,
     resetRejectedHooks,
   } = useLocalWorkspace();
-
-  const handleOnboardingComplete = (newProfile: CreatorProfile) => {
-    setCreatorProfile(newProfile);
-    setShowOnboarding(false);
-  };
 
   useEffect(() => {
     if (!user?.id) return;
@@ -111,10 +105,15 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         <AuthModal mode={authMode} onClose={() => setShowAuth(false)} onSuccess={() => setShowAuth(false)} />
       )}
 
-      {showOnboarding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FAFAF8]/80 p-4 backdrop-blur-sm">
-          <Onboarding onComplete={handleOnboardingComplete} />
-        </div>
+      {showAccount && (
+        <AccountModal
+          profile={profile}
+          fallbackEmail={user?.email}
+          onClose={() => setShowAccount(false)}
+          onSaved={async () => {
+            await refreshProfile();
+          }}
+        />
       )}
 
       {previewHook && (
@@ -129,6 +128,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
       {rewriteHook && (
         <RewritePanel
           hook={rewriteHook}
+          defaultTopic={searchQuery || userPrompt || workspace.profile?.niche || ''}
           onClose={() => setRewriteHook(null)}
           onSaveRewrite={saveRewrite}
         />
@@ -136,17 +136,17 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
 
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         <DashboardSidebar
-          profile={workspace.profile}
           savedHooks={workspace.savedHooks}
           savedRewrites={workspace.savedRewrites}
           userLabel={profile?.name ?? user?.email?.split('@')[0] ?? 'Creator'}
+          avatarUrl={profile?.avatar_url}
           planLabel={planLabel(profile?.plan)}
           scriptsLabel={scriptsLabel}
           isSignedIn={Boolean(user)}
           onNewSearch={() => document.getElementById('dashboard-search')?.focus()}
           onShowSavedHooks={scrollToSavedHooks}
           onShowSavedRewrites={scrollToSavedRewrites}
-          onEditProfile={() => setShowOnboarding(true)}
+          onEditAccount={() => setShowAccount(true)}
           onRewrite={setRewriteHook}
           onUnsave={unsaveHook}
           onSignIn={openSignIn}
@@ -167,12 +167,9 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
               ) : (
                 <>
                   <button onClick={openSignIn} className="rounded-full px-3 py-1.5 text-xs font-medium text-[#555]">Sign in</button>
-                  <button onClick={openSignUp} className="rounded-full bg-[#DC2626] px-3 py-1.5 text-xs font-medium text-white">Get started free</button>
+                  <button onClick={openSignUp} className="rounded-full bg-[#DC2626] px-3 py-1.5 text-xs font-medium text-white">Create account</button>
                 </>
               )}
-              <button onClick={() => setShowOnboarding(true)} className="rounded-full bg-white border border-[#ece7df] px-3 py-1.5 text-xs font-medium text-[#555]">
-                Creator profile
-              </button>
             </div>
           </header>
 
@@ -200,11 +197,6 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
                     <span className="mr-1.5 text-xs text-[#aaa]">topic:</span>
                     <span className="font-medium text-[#111]">&ldquo;{displayTopic}&rdquo;</span>
                   </div>
-                )}
-                {user && profile?.plan !== 'lifetime' && (
-                  <Link href="/upgrade" className="rounded-full bg-[#DC2626] px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700">
-                    Upgrade to Founding Pro →
-                  </Link>
                 )}
               </div>
             </div>

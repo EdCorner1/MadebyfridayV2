@@ -74,7 +74,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
           <p className="mt-1 text-sm text-[#888]">
             {mode === 'signin'
               ? 'Sign in with email to access your saved hooks and rewrites.'
-              : 'Start with 10 free rewrites. No credit card needed.'}
+              : 'Create your account, save your workspace, and start rewriting. No credit card needed.'}
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
               disabled={loading}
               className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90 transition disabled:opacity-50"
             >
-              {loading ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create free account'}
+              {loading ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create account'}
             </button>
           </form>
 
@@ -134,7 +134,7 @@ export default function AuthModal({ mode: initialMode = 'signin', onClose, onSuc
               onClick={switchMode}
               className="font-medium text-[#DC2626] hover:underline"
             >
-              {mode === 'signin' ? 'Sign up free' : 'Sign in'}
+              {mode === 'signin' ? 'Create account' : 'Sign in'}
             </button>
           </p>
 

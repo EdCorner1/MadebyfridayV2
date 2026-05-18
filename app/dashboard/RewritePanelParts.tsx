@@ -20,9 +20,9 @@ export function AuthRequiredPrompt({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
         </button>
         <div className="text-4xl mb-4">🖤</div>
-        <h3 className="text-xl font-semibold text-[#111] mb-2">Create a free account to rewrite</h3>
-        <p className="text-sm text-[#888] mb-6">You can search and save hooks first. Sign up when you&apos;re ready for Friday to rewrite them and sync your workspace.</p>
-        <button type="button" onClick={onSignupClick} className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90">Get 10 free rewrites →</button>
+        <h3 className="text-xl font-semibold text-[#111] mb-2">Create an account to rewrite</h3>
+        <p className="text-sm text-[#888] mb-6">Search first, then sign up when you&apos;re ready for Friday to rewrite and save your workspace.</p>
+        <button type="button" onClick={onSignupClick} className="w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90">Create account →</button>
         <button type="button" onClick={onSigninClick} className="mt-3 text-sm text-[#888] hover:text-[#333]">Already have an account? Sign in</button>
       </div>
     </div>
@@ -34,9 +34,9 @@ export function UpgradePrompt({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-white rounded-[24px] shadow-2xl p-8 text-center">
         <div className="text-4xl mb-4">🔥</div>
-        <h3 className="text-xl font-semibold text-[#111] mb-2">You&apos;ve used your free rewrites</h3>
-        <p className="text-sm text-[#888] mb-6">You&apos;ve burned through your 10 free rewrites this month. Upgrade for unlimited rewrites and full access to the viral hook engine.</p>
-        <Link href="/upgrade" onClick={onClose} className="block w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90">Upgrade →</Link>
+        <h3 className="text-xl font-semibold text-[#111] mb-2">You&apos;ve used your monthly rewrites</h3>
+        <p className="text-sm text-[#888] mb-6">You&apos;ve hit this month&apos;s 10-rewrite limit. Go unlimited for lifetime Pro access while the first 100 seats are available.</p>
+        <Link href="/upgrade" onClick={onClose} className="block w-full rounded-full bg-[#DC2626] py-3 text-sm font-medium text-white hover:opacity-90">Go unlimited →</Link>
         <button type="button" onClick={onClose} className="mt-4 text-sm text-[#aaa] hover:text-[#666]">Maybe later</button>
       </div>
     </div>
@@ -60,10 +60,10 @@ export function RewriteShell({ hook, onClose, children }: { hook: Hook; onClose:
         <div className="grid gap-4 border-b border-[#ece7df] bg-[#fafaf8] px-6 py-4 sm:grid-cols-[110px_1fr]">
           <div className="max-w-[110px]"><PatternPreviewTile hook={hook} index={0} compact /></div>
           <div>
-            <p className="text-xs text-[#aaa] mb-1">Reference hook</p>
-            <p className="text-[15px] font-medium text-[#111] leading-snug">{hook.name}</p>
+            <p className="text-xs text-[#aaa] mb-1">Friday&apos;s draft hook</p>
+            <p className="text-[15px] font-semibold text-[#111] leading-snug">{hook.adapted_hook || hook.name}</p>
+            {hook.adapted_hook && <p className="mt-2 text-xs leading-5 text-[#888]"><span className="font-medium text-[#787167]">Original pattern:</span> {hook.name}</p>}
             <HookMeta hook={hook} />
-            <p className="mt-3 text-xs font-medium text-[#787167]">Source reference loaded privately — no off-platform scavenger hunt.</p>
           </div>
         </div>
 
@@ -91,11 +91,11 @@ export function QuotaBar({ profile }: { profile: Profile }) {
 export function TopicInput({ value, hasTranscript, onChange }: { value: string; hasTranscript: boolean; onChange: (value: string) => void }) {
   return (
     <div>
-      <label className="mb-2 block text-[11px] font-semibold uppercase tracking-widest text-[#787167]">What&apos;s your angle?</label>
+      <label className="mb-2 block text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Want to tweak the angle?</label>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder={hasTranscript ? 'Describe your angle — Friday will base the rewrite on the actual viral content and this description...' : "I'm making a TikTok about how beginners waste time at the gym. I want to hook people in the first 3 seconds..."}
+        placeholder={hasTranscript ? 'Add any extra direction for the rewrite...' : 'Optional: add tone, audience, offer, or anything Friday should avoid...'}
         rows={3}
         className="w-full rounded-[14px] border border-[#ece7df] bg-[#fafaf8] p-4 text-sm text-[#111] placeholder:text-[#ccc] focus:outline-none focus:border-[#DC2626] resize-none"
       />

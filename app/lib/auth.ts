@@ -50,3 +50,18 @@ export async function upsertProfile(userId: string, email: string, name?: string
 
   return { data, error };
 }
+
+export async function updateProfile(userId: string, updates: Pick<Partial<Profile>, 'name' | 'avatar_url'>) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      name: updates.name ?? null,
+      avatar_url: updates.avatar_url ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select()
+    .single();
+
+  return { data, error };
+}

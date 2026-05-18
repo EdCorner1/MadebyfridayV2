@@ -67,8 +67,15 @@ export default function PatternLightbox({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#787167]">Hook structure</p>
-            <p className="mt-2 text-lg font-medium leading-7 text-[#111]">{hook.name}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#787167]">Friday&apos;s version for your topic</p>
+            <p className="mt-2 text-lg font-semibold leading-7 text-[#111]">{hook.adapted_hook || hook.name}</p>
+
+            {hook.adapted_hook && (
+              <div className="mt-4 rounded-[16px] border border-[#ece7df] bg-white p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#787167]">Original viral structure</p>
+                <p className="mt-2 text-sm leading-6 text-[#666]">{hook.name}</p>
+              </div>
+            )}
 
             {hook.rewrite_strategy && (
               <div className="mt-5 rounded-[16px] border border-[#ece7df] bg-[#fafaf8] p-4">
@@ -80,9 +87,9 @@ export default function PatternLightbox({
             <HookMeta hook={hook} />
 
             <div className="mt-5 rounded-[16px] bg-[#111] p-4 text-white">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">No Instagram clickaway</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-white/45">Live source when available</p>
               <p className="mt-2 text-sm leading-6 text-white/75">
-                This is a controlled pattern preview. The goal is to understand the viral mechanic without sending users off-platform.
+                Friday keeps the reference inside the workspace when Instagram allows embeds. If the source refuses to load, the hook structure still gives you the useful bit without the doom-scroll tax.
               </p>
             </div>
           </div>

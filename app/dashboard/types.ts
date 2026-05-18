@@ -21,6 +21,7 @@ export interface Hook {
   best_for?: string[];
   difficulty?: string;
   score?: number;
+  adapted_hook?: string;
 }
 
 export interface StructuredRewrite {

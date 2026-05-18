@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (founding && founding.count >= founding.max) {
-        return NextResponse.json({ error: 'Founding deal sold out' }, { status: 409 });
+        return NextResponse.json({ error: 'The lifetime Pro seats are sold out' }, { status: 409 });
       }
     }
 

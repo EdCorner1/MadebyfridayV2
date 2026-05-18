@@ -55,10 +55,10 @@ export default function PricingSection() {
       <div className="mb-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-coral/70">Pricing</p>
         <h2 className="mt-3 font-display text-4xl font-medium tracking-[-0.035em] text-charcoal sm:text-5xl">
-          Start free. Upgrade when you want more.
+          Go unlimited when you hit the wall.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-charcoal/55 sm:text-base">
-          Start free. Upgrade when you want more rewrites, saved hooks, and a stronger content workflow.
+          Free users get 10 rewrites each month. Pro gives you unlimited rewrites and a cleaner content workflow.
         </p>
       </div>
 
