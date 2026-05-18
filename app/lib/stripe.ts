@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { getPublicSiteUrl } from './site';
 
 export function getStripe() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -10,5 +11,5 @@ export function getStripe() {
 }
 
 export function getSiteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  return getPublicSiteUrl();
 }

@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from './components/AuthProvider';
 import PwaRegister from './components/PwaRegister';
+import { getPublicSiteUrl } from './lib/site';
 
 const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -17,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.madebyfriday.tech'),
+  metadataBase: new URL(getPublicSiteUrl()),
   applicationName: 'Made by Friday',
   title: 'Made by Friday — Viral Script Generator for UGC Creators',
   description: 'Tell Friday what you\'re making. Get viral hooks, pick your winner, and rewrite your script in your creator workspace.',
