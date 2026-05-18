@@ -191,7 +191,7 @@ Return this JSON shape exactly:
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://madebyfriday.tech',
+        'HTTP-Referer': 'https://www.madebyfriday.tech',
         'X-Title': 'Made by Friday',
       },
       body: JSON.stringify({
@@ -214,7 +214,7 @@ Return this JSON shape exactly:
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://madebyfriday.tech',
+          'HTTP-Referer': 'https://www.madebyfriday.tech',
           'X-Title': 'Made by Friday',
         },
         body: JSON.stringify({
@@ -230,7 +230,7 @@ Return this JSON shape exactly:
       if (!retryRes.ok) {
         const retryErrorText = await retryRes.text();
         console.error('[rewrite] OpenRouter retry failed', retryRes.status, retryErrorText.slice(0, 500));
-        return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
+        return NextResponse.json({ error: 'AI request failed', providerStatus: retryRes.status, providerMessage: retryErrorText.slice(0, 240) }, { status: 502 });
       }
 
       const retryData = await retryRes.json();
