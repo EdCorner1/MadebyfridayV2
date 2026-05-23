@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreatorProfile, Hook, SavedRewrite } from './types';
+import { CreatorProfile, Hook, SavedRewrite, ScheduledPost, SocialAccountPlan } from './types';
 
 const STORAGE_KEY = 'mbf_workspace';
 const LEGACY_PROFILE_KEY = 'friday_profile';
@@ -11,6 +11,8 @@ export type LocalWorkspace = {
   savedHooks: Hook[];
   rejectedHookUrls: string[];
   savedRewrites: SavedRewrite[];
+  accountPlan: SocialAccountPlan | null;
+  scheduledPosts: ScheduledPost[];
 };
 
 const EMPTY_WORKSPACE: LocalWorkspace = {
@@ -18,6 +20,8 @@ const EMPTY_WORKSPACE: LocalWorkspace = {
   savedHooks: [],
   rejectedHookUrls: [],
   savedRewrites: [],
+  accountPlan: null,
+  scheduledPosts: [],
 };
 
 function unique(values: string[]): string[] {
@@ -44,6 +48,16 @@ function uniqueRewrites(rewrites: SavedRewrite[]): SavedRewrite[] {
   }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
+function uniqueScheduledPosts(posts: ScheduledPost[]): ScheduledPost[] {
+  const seen = new Set<string>();
+  return posts.filter((post) => {
+    const key = post.id;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => new Date(a.scheduledFor || a.createdAt).getTime() - new Date(b.scheduledFor || b.createdAt).getTime());
+}
+
 function parseJson<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
   try {
@@ -68,6 +82,8 @@ function migrateLegacyWorkspace(): LocalWorkspace {
     })),
     rejectedHookUrls: unique(rejectedHookUrls),
     savedRewrites: [],
+    accountPlan: null,
+    scheduledPosts: [],
   };
 }
 
@@ -84,6 +100,8 @@ function normaliseWorkspace(workspace: Partial<LocalWorkspace> & { savedHookUrls
     savedHooks: uniqueHooks(migratedSavedHooks),
     rejectedHookUrls: unique(workspace.rejectedHookUrls ?? []),
     savedRewrites: uniqueRewrites(workspace.savedRewrites ?? []),
+    accountPlan: workspace.accountPlan ?? null,
+    scheduledPosts: uniqueScheduledPosts(workspace.scheduledPosts ?? []),
   };
 }
 
@@ -158,6 +176,28 @@ export function useLocalWorkspace() {
     updateWorkspace((current) => ({
       ...current,
       savedRewrites: current.savedRewrites.filter((rewrite) => rewrite.id !== id),
+      scheduledPosts: current.scheduledPosts.filter((post) => post.rewriteId !== id),
+    }));
+  };
+
+  const saveAccountPlan = (accountPlan: SocialAccountPlan) => {
+    updateWorkspace((current) => ({ ...current, accountPlan }));
+  };
+
+  const saveScheduledPost = (post: ScheduledPost) => {
+    updateWorkspace((current) => ({
+      ...current,
+      scheduledPosts: uniqueScheduledPosts([
+        post,
+        ...current.scheduledPosts.filter((existing) => existing.id !== post.id),
+      ]),
+    }));
+  };
+
+  const deleteScheduledPost = (id: string) => {
+    updateWorkspace((current) => ({
+      ...current,
+      scheduledPosts: current.scheduledPosts.filter((post) => post.id !== id),
     }));
   };
 
@@ -174,6 +214,9 @@ export function useLocalWorkspace() {
     unsaveHook,
     saveRewrite,
     deleteRewrite,
+    saveAccountPlan,
+    saveScheduledPost,
+    deleteScheduledPost,
     resetRejectedHooks,
   };
 }

@@ -43,3 +43,26 @@ export interface SavedRewrite {
   remaining?: number;
   createdAt: string;
 }
+
+export interface SocialAccountPlan {
+  platform: string;
+  handle: string;
+  niche: string;
+  idealViewer: string;
+  contentGoal: string;
+  postingCadence: string;
+  timezone: string;
+}
+
+export interface ScheduledPost {
+  id: string;
+  rewriteId?: string;
+  title: string;
+  platform: string;
+  scheduledFor: string;
+  status: 'idea' | 'scheduled' | 'filmed' | 'posted';
+  hook: string;
+  caption?: string;
+  notes?: string;
+  createdAt: string;
+}

@@ -8,6 +8,7 @@ import DashboardSidebar from './DashboardSidebar';
 import RewritePanel from './RewritePanel';
 import PatternLightbox from './PatternLightbox';
 import AccountModal from './AccountModal';
+import ContentPlanPanel from './ContentPlanPanel';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../components/AuthProvider';
 import { getScriptLimit, getScriptsRemaining } from '../lib/quota';
@@ -30,6 +31,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
   const router = useRouter();
   const { user, profile, loading, signOut, refreshProfile } = useAuth();
   const [showAccount, setShowAccount] = useState(false);
+  const [showContentPlan, setShowContentPlan] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [searchQuery, setSearchQuery] = useState(userPrompt);
@@ -42,6 +44,9 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
     rejectHook,
     unsaveHook,
     saveRewrite,
+    saveAccountPlan,
+    saveScheduledPost,
+    deleteScheduledPost,
     resetRejectedHooks,
   } = useLocalWorkspace();
 
@@ -116,6 +121,18 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
         />
       )}
 
+      {showContentPlan && (
+        <ContentPlanPanel
+          accountPlan={workspace.accountPlan}
+          scheduledPosts={workspace.scheduledPosts}
+          savedRewrites={workspace.savedRewrites}
+          onClose={() => setShowContentPlan(false)}
+          onSaveAccountPlan={saveAccountPlan}
+          onSaveScheduledPost={saveScheduledPost}
+          onDeleteScheduledPost={deleteScheduledPost}
+        />
+      )}
+
       {previewHook && (
         <PatternLightbox
           hook={previewHook.hook}
@@ -146,6 +163,7 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
           onNewSearch={() => document.getElementById('dashboard-search')?.focus()}
           onShowSavedHooks={scrollToSavedHooks}
           onShowSavedRewrites={scrollToSavedRewrites}
+          onShowContentPlan={() => setShowContentPlan(true)}
           onEditAccount={() => setShowAccount(true)}
           onRewrite={setRewriteHook}
           onUnsave={unsaveHook}
@@ -198,6 +216,13 @@ export default function DashboardClient({ initialHooks, userPrompt }: DashboardC
                     <span className="font-medium text-[#111]">&ldquo;{displayTopic}&rdquo;</span>
                   </div>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setShowContentPlan(true)}
+                  className="rounded-full bg-[#111] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#333]"
+                >
+                  Plan content →
+                </button>
               </div>
             </div>
           </div>

@@ -12,11 +12,17 @@ export function mergeWorkspaces(local: LocalWorkspace, remote: LocalWorkspace | 
   for (const rewrite of remote.savedRewrites ?? []) rewritesById.set(rewrite.id, rewrite);
   for (const rewrite of local.savedRewrites ?? []) rewritesById.set(rewrite.id, rewrite);
 
+  const postsById = new Map<string, LocalWorkspace['scheduledPosts'][number]>();
+  for (const post of remote.scheduledPosts ?? []) postsById.set(post.id, post);
+  for (const post of local.scheduledPosts ?? []) postsById.set(post.id, post);
+
   return {
     profile: local.profile ?? remote.profile,
     savedHooks: [...hooksByUrl.values()],
     rejectedHookUrls: [...new Set([...(remote.rejectedHookUrls ?? []), ...(local.rejectedHookUrls ?? [])])],
     savedRewrites: [...rewritesById.values()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    accountPlan: local.accountPlan ?? remote.accountPlan ?? null,
+    scheduledPosts: [...postsById.values()].sort((a, b) => new Date(a.scheduledFor || a.createdAt).getTime() - new Date(b.scheduledFor || b.createdAt).getTime()),
   };
 }
 

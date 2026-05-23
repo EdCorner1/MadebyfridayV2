@@ -13,6 +13,7 @@ type DashboardSidebarProps = {
   onNewSearch: () => void;
   onShowSavedHooks: () => void;
   onShowSavedRewrites: () => void;
+  onShowContentPlan: () => void;
   onEditAccount: () => void;
   onRewrite: (hook: Hook) => void;
   onUnsave: (url: string) => void;
@@ -45,6 +46,7 @@ export default function DashboardSidebar({
   onNewSearch,
   onShowSavedHooks,
   onShowSavedRewrites,
+  onShowContentPlan,
   onEditAccount,
   onRewrite,
   onUnsave,
@@ -95,6 +97,7 @@ export default function DashboardSidebar({
           </Link>
           <NavButton onClick={onShowSavedHooks}>Saved hooks ({savedHooks.length})</NavButton>
           <NavButton onClick={onShowSavedRewrites}>Saved rewrites ({savedRewrites.length})</NavButton>
+          <NavButton onClick={onShowContentPlan}>Content plan</NavButton>
           {isSignedIn && <NavButton onClick={onEditAccount}>Edit profile</NavButton>}
         </nav>
 
